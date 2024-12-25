@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dev Tools</title>
+  <link rel="icon" href="assets/favicon.ico" type="image/x-icon">
+  <link rel="apple-touch-icon" sizes="180x180" href="assets/apple-touch-icon.png">
+  <link rel="icon" type="image/png" sizes="192x192" href="assets/android-chrome-192x192.png">
+  <link rel="manifest" href="site.webmanifest">
+  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/moment.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/moment-timezone/0.5.34/moment-timezone-with-data.min.js"></script>
+  <script src="https://unpkg.com/json5@2/dist/index.min.js"></script>
+  <script src="https://unpkg.com/monaco-editor@latest/min/vs/loader.js"></script>
+  <!-- <script src="https://cdn.jsdelivr.net/npm/uuid@8.3.2/dist/umd/uuidv4.min.js"></script> -->
+</head>
+
+<body>
+  <div class="container">
+    <div class="tabs">
+      <button class="tab-button active" onclick="openTab(event, 'jsonToJson5')">JSON <i class="fas fa-left-right"></i> JSON5</button>
+      <button class="tab-button" onclick="openTab(event, 'stringManipulation')"><i class="fas fa-filter"></i> Strings</button>
+      <button class="tab-button" onclick="openTab(event, 'timestampToDate')"><i class="fas fa-clock"></i> Timestamp to Date</button>
+      <button class="tab-button" onclick="openTab(event, 'uuid')"><i class="fas fa-key"></i> UUID</button>
+    </div>
+
+    <div id="jsonToJson5" class="tab-content">
+      <!--Convert JSON to JSON5-->
+      <div class="side-by-side">
+        <div class="editor-container">
+          <div class="button-group">
+            <button class="convert-button" onclick="execute_convertJsonToJson5()">JSON <i class="fa-sharp fa-solid fa-circle-chevron-right"></i></button>
+          </div>
+          <div class="button-group">
+            <button id="pasteJsonButton" class="action-button"><i class="fas fa-paste"></i> Paste</button>
+            <button id="copyJsonButton" class="action-button"><i class="fas fa-copy"></i> Copy</button>
+          </div>
+          <!-- <textarea id="jsonInput" placeholder="JSON"></textarea> -->
+          <div id="jsonInput" class="code-editor"></div>
+        </div>
+        <div class="editor-container">
+          <div class="button-group">
+            <button class="convert-button" onclick="execute_convertJson5ToJson()"><i class="fa-sharp fa-solid fa-circle-chevron-left"></i> JSON5</button>
+          </div>
+          <div class="button-group">
+            <button id="pasteJson5Button" class="action-button"><i class="fas fa-paste"></i> Paste</button>
+            <button id="copyJson5Button" class="action-button"><i class="fas fa-copy"></i> Copy</button>
+          </div>
+          <!-- <textarea id="json5Input" placeholder="JSON5"></textarea> -->
+          <div id="json5Input" class="code-editor"></div>
+        </div>
+      </div>
+    </div>
+
+    <div id="stringManipulation" class="tab-content">
+      <!--Strip Newlines-->
+      <div class="side-by-side">
+        <div class="editor-container">
+          <div class="button-group">
+            <button class="convert-button" onclick="execute_stripNewlines()">Strip Newlines <i class="fa-sharp fa-solid fa-circle-chevron-right"></i></button>
+            <button class="convert-button" onclick="execute_quoteStringValue()">Quote <i class="fa-sharp fa-solid fa-circle-chevron-right"></i></button>
+          </div>
+          <div class="button-group">
+            <button id="pasteInputStringButton" class="action-button"><i class="fas fa-paste"></i> Paste</button>
+            <button id="copyInputStringButton" class="action-button"><i class="fas fa-copy"></i> Copy</button>
+          </div>
+          <!-- <textarea id="stringInput" placeholder="Input..."></textarea> -->
+          <div id="stringInput" class="code-editor"></div>
+        </div>
+        <div class="editor-container">
+          <div class="button-group">
+            <button class="convert-button" onclick="execute_unquoteStringValue()"><i class="fa-sharp fa-solid fa-circle-chevron-left"></i> Unquote</button>
+          </div>
+          <div class="button-group">
+            <button id="pasteOutputStringButton" class="action-button"><i class="fas fa-paste"></i> Paste</button>
+            <button id="copyOutputStringButton" class="action-button"><i class="fas fa-copy"></i> Copy</button>
+          </div>
+          <!-- <textarea id="stringOutput" placeholder="Output..." readonly></textarea> -->
+          <div id="stringOutput" class="code-editor"></div>
+        </div>
+      </div>
+    </div>
+
+    <div id="timestampToDate" class="tab-content">
+      <!--Convert Timestamp to Date-->
+      <div class="side-by-side">
+        <div class="editor-container">
+          <div class="button-group">
+            <button class="convert-button" onclick="execute_convertTimestampToDate()">Convert <i class="fa-sharp fa-solid fa-circle-chevron-right"></i></button>
+          </div>
+          <div class="button-group">
+            <button id="pasteTimestampButton" class="action-button"><i class="fas fa-paste"></i> Paste</button>
+          </div>
+          <div class="field">
+            <input type="text" id="timestampInput" placeholder="Enter Timestamp">
+          </div>
+          <div class="field">
+            <select id="timezoneSelect">
+              <option value="America/New_York">Eastern Time (ET)</option>
+              <option value="America/Chicago" selected>Central Time (CT)</option>
+              <option value="America/Denver">Mountain Time (MT)</option>
+              <option value="America/Phoenix">Mountain Time (Arizona)</option>
+              <option value="America/Los_Angeles">Pacific Time (PT)</option>
+              <option value="America/Anchorage">Alaska Time (AKT)</option>
+              <option value="Pacific/Honolulu">Hawaii-Aleutian Time (HAT)</option>
+            </select>
+          </div>
+          <div class="field">
+            <input type="text" id="timestampFormat" placeholder="Format" value="YYYY-MM-DD HH:mm:ss.sss">
+          </div>
+        </div>
+        <div class="editor-container">
+          <div class="button-group">
+            <button class="convert-button" onclick="execute_convertDatePartsToTimestamp()"><i class="fa-sharp fa-solid fa-circle-chevron-left"></i> Convert</button>
+          </div>
+          <div class="button-group">
+            <button id="copyTimestampButton" class="action-button"><i class="fas fa-copy"></i> Copy</button>
+          </div>
+          <div class="field">
+            <input type="text" id="dateOutput">
+          </div>
+          <div class="equal-width">
+            <div class="field">
+              <label for="yearInput">Year</label>
+              <input name="yearInput" type="number" id="yearInput" step="1" maxlength="4" placeholder="YYYY">
+            </div>
+            <div class="field">
+              <label for="monthInput">Month</label>
+              <input name="monthInput" type="number" id="monthInput" min="1" max="12" step="1" maxlength="2" placeholder="MM">
+            </div>
+            <div class="field">
+              <label for="dayInput">Day</label>
+              <input name="dayInput" type="number" id="dayInput" min="1" max="31" step="1" maxlength="2" placeholder="DD">
+            </div>
+            <div class="field">
+              <label for="hourInput">Hour (24h)</label>
+              <input name="hourInput" type="number" id="hourInput" min="0" max="23" step="1" maxlength="2" placeholder="HH">
+            </div>
+            <div class="field">
+              <label for="minuteInput">Minutes</label>
+              <input name="minuteInput" type="number" id="minuteInput" step="1" min="0" max="59" maxlength="2" placeholder="MM">
+            </div>
+            <div class="field">
+              <label for="secondInput">Seconds</label>
+              <input name="secondInput" type="number" id="secondInput" step="1" min="0" max="59" maxlength="2" placeholder="SS">
+            </div>
+            <div class="field">
+              <label for="millisecondInput">Milliseconds</label>
+              <input name="millisecondInput" type="number" id="millisecondInput" step="1" min="0" max="999" maxlength="3" placeholder="SSS">
+            </div>
+          </div>
+        </div>
+      </div>
+      <table>
+        <tbody>
+          <tr>
+            <td width="200">Timstamp (ms)</td>
+            <td id="timestampDisplayMilliseconds" class="click-to-copy"></td>
+          </tr>
+          <tr>
+            <td width="200">Format</td>
+            <td id="timestampDisplayFormat" class="click-to-copy"></td>
+          </tr>
+          <tr>
+            <td width="200">GMT</td>
+            <td id="timestampDisplayGmt" class="click-to-copy"></td>
+          </tr>
+          <tr>
+            <td>Your Time Zone</td>
+            <td id="timestampDisplayLocal" class="click-to-copy"></td>
+          </tr>
+          <tr>
+            <td>Relative</td>
+            <td id="timestampDisplayRelative" class="click-to-copy"></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div id="uuid" class="tab-content">
+      <!-- UUID Generator -->
+      <div class="button-group">
+        <button class="convert-button" onclick="execute_refreshUuid()">Refresh UUID <i class="fas fa-sync-alt"></i></button>
+      </div>
+      <div class="field">
+        <label for="uuidWithDashes">UUID v4:</label>
+        <input type="text" id="uuidWithDashes">
+      </div>
+      <div class="field">
+        <label for="uuidWithoutDashes">UUID (without dashes):</label>
+        <input type="text" id="uuidWithoutDashes">
+      </div>
+    </div>
+  </div>
+
+  <script src="scripts/jsonToJson5.js"></script>
+  <script src="scripts/json5ToJson.js"></script>
+  <script src="scripts/timestampToDate.js"></script>
+  <script src="scripts/stringManipulation.js"></script>
+  <script src="scripts/uuid.js"></script>
+  <script src="scripts/app.js"></script>
+</body>
+
+</html>
