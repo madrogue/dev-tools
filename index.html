@@ -26,6 +26,7 @@
       <button class="tab-button" onclick="openTab(event, 'stringManipulation')"><i class="fas fa-filter"></i> Strings</button>
       <button class="tab-button" onclick="openTab(event, 'timestampToDate')"><i class="fas fa-clock"></i> Timestamp to Date</button>
       <button class="tab-button" onclick="openTab(event, 'uuid')"><i class="fas fa-key"></i> UUID</button>
+      <button class="tab-button" onclick="openTab(event, 'convert')"><i class="fas fa-exchange-alt"></i> Convert</button>
     </div>
 
     <div id="jsonToJson5" class="tab-content">
@@ -195,6 +196,44 @@
         <input type="text" id="uuidWithoutDashes">
       </div>
     </div>
+
+    <div id="convert" class="tab-content">
+      <!-- Convert multiple values -->
+      <div class="equal-width">
+        <div class="field">
+          <label for="cInput">Celcius</label>
+          <input name="cInput" type="number" id="cInput" step="0.1" placeholder="C">
+        </div>
+        <div class="field-buttons">
+          <label>Temperature</label>
+          <div class="button-container">
+            <button class="convert-button" onclick="execute_convertFtoC()"><i class="fa-sharp fa-solid fa-circle-chevron-left"></i></button>
+            <button class="convert-button" onclick="execute_convertCtoF()"><i class="fa-sharp fa-solid fa-circle-chevron-right"></i></button>
+          </div>
+        </div>
+        <div class="field">
+          <label for="fInput">Fahrenheit</label>
+          <input name="fInput" type="number" id="fInput" step="0.1" placeholder="F">
+        </div>
+      </div>
+      <div class="equal-width">
+        <div class="field">
+          <label for="paInput">Pascals</label>
+          <input name="paInput" type="number" id="paInput" step="0.1" placeholder="Pa">
+        </div>
+        <div class="field-buttons">
+          <label>Pressure</label>
+          <div class="button-container">
+            <button class="convert-button" onclick="execute_convertInHgToPa()"><i class="fa-sharp fa-solid fa-circle-chevron-left"></i></button>
+            <button class="convert-button" onclick="execute_convertPaToInHg()"><i class="fa-sharp fa-solid fa-circle-chevron-right"></i></button>
+          </div>
+        </div>
+        <div class="field">
+          <label for="inHgInput">inHg</label>
+          <input name="inHgInput" type="number" id="inHgInput" step="0.1" placeholder="inHg">
+        </div>
+      </div>
+    </div>
   </div>
 
   <script src="scripts/jsonToJson5.js"></script>
@@ -202,6 +241,7 @@
   <script src="scripts/timestampToDate.js"></script>
   <script src="scripts/stringManipulation.js"></script>
   <script src="scripts/uuid.js"></script>
+  <script src="scripts/convert.js"></script>
   <script src="scripts/app.js"></script>
 </body>
 
