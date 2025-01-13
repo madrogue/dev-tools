@@ -227,19 +227,19 @@ function tidyEditor(editor) {
 document.addEventListener("keydown", function (e) {
   if (e.ctrlKey && e.key === "k") {
     document.addEventListener("keydown", function (e) {
-        if (e.ctrlKey && e.key === "d") {
-          e.preventDefault();
-          if (document.getElementById("jsonInput").parentElement.classList.contains("active")) {
-            tidyEditor(jsonInputEditor);
+      if (e.ctrlKey && e.key === "d") {
+        e.preventDefault();
+        if (document.getElementById("jsonInput").parentElement.classList.contains("active")) {
+          tidyEditor(jsonInputEditor);
         } else if (document.getElementById('json5Input').parentElement.classList.contains('active')) {
-            tidyEditor(json5InputEditor);
+          tidyEditor(json5InputEditor);
         } else if (document.getElementById('stringInput').parentElement.classList.contains('active')) {
-            tidyEditor(stringInputEditor);
+          tidyEditor(stringInputEditor);
         } else if (document.getElementById('stringOutput').parentElement.classList.contains('active')) {
-            tidyEditor(stringOutputEditor);
-          }
+          tidyEditor(stringOutputEditor);
         }
-      },
+      }
+    },
       { once: true }
     );
   }
@@ -251,18 +251,18 @@ function copyFromEditor(editor) {
     console.log('Text copied to clipboard');
   }).catch(err => {
     console.error('Failed to copy text: ', err);
-    });
+  });
 }
 
 function pasteToEditor(editor, callback) {
   navigator.clipboard.readText().then(text => {
-      editor.setValue(text);
-      if (callback) {
-        callback();
-      }
+    editor.setValue(text);
+    if (callback) {
+      callback();
+    }
   }).catch(err => {
     console.error('Failed to read clipboard contents: ', err);
-    });
+  });
 }
 
 function copyTimestamp() {
@@ -271,62 +271,62 @@ function copyTimestamp() {
     console.log('Timestamp copied to clipboard');
   }).catch(err => {
     console.error('Failed to copy timestamp: ', err);
-    });
+  });
 }
 
 function pasteTimestamp() {
   navigator.clipboard.readText().then(text => {
-      timestampInput.value = text;
-      execute_convertTimestampToDate();
+    timestampInput.value = text;
+    execute_convertTimestampToDate();
   }).catch(err => {
     console.error('Failed to read clipboard contents: ', err);
-    });
+  });
 }
 
 //#region Editor copy/paste buttons
 document.getElementById('copyJsonButton').addEventListener('click', function () {
-    copyFromEditor(jsonInputEditor);
-  });
+  copyFromEditor(jsonInputEditor);
+});
 
 document.getElementById('pasteJsonButton').addEventListener('click', function () {
-    pasteToEditor(jsonInputEditor, execute_convertJsonToJson5);
-  });
+  pasteToEditor(jsonInputEditor, execute_convertJsonToJson5);
+});
 
 document.getElementById('copyJson5Button').addEventListener('click', function () {
-    copyFromEditor(json5InputEditor);
-  });
+  copyFromEditor(json5InputEditor);
+});
 
 document.getElementById('pasteJson5Button').addEventListener('click', function () {
-    pasteToEditor(json5InputEditor, execute_convertJson5ToJson);
-  });
+  pasteToEditor(json5InputEditor, execute_convertJson5ToJson);
+});
 //#endregion
 
 //#region String copy/paste buttons
 document.getElementById('copyInputStringButton').addEventListener('click', function () {
-    copyFromEditor(stringInputEditor);
-  });
+  copyFromEditor(stringInputEditor);
+});
 
 document.getElementById('pasteInputStringButton').addEventListener('click', function () {
-    pasteToEditor(stringInputEditor);
-  });
+  pasteToEditor(stringInputEditor);
+});
 
 document.getElementById('copyOutputStringButton').addEventListener('click', function () {
-    copyFromEditor(stringOutputEditor);
-  });
+  copyFromEditor(stringOutputEditor);
+});
 
 document.getElementById('pasteOutputStringButton').addEventListener('click', function () {
-    pasteToEditor(stringOutputEditor);
-  });
+  pasteToEditor(stringOutputEditor);
+});
 //#endregion
 
 //#region Timestamp copy/paste buttons
 document.getElementById('copyTimestampButton').addEventListener('click', function () {
-    copyTimestamp();
-  });
+  copyTimestamp();
+});
 
 document.getElementById('pasteTimestampButton').addEventListener('click', function () {
-    pasteTimestamp();
-  });
+  pasteTimestamp();
+});
 //#endregion
 
 function execute_convertJsonToJson5() {
@@ -450,6 +450,38 @@ function execute_convertInHgToPa() {
   try {
     const pascal = convertInHgToPa(inHg);
     document.getElementById("paInput").value = pascal;
+  } catch (error) {
+    alert(error.message);
+  }
+}
+
+function execute_convertTimeToMs() {
+  const days = parseInt(document.getElementById('daysInput').value) || 0;
+  const hours = parseInt(document.getElementById('hoursInput').value) || 0;
+  const minutes = parseInt(document.getElementById('minutesInput').value) || 0;
+  const seconds = parseInt(document.getElementById('secondsInput').value) || 0;
+  const milliseconds = parseInt(document.getElementById('millisecondsInput2').value) || 0;
+
+  const time = { days, hours, minutes, seconds, milliseconds };
+
+  try {
+    const totalMilliseconds = convertTimeToMs(time);
+    document.getElementById('millisecondsInput').value = totalMilliseconds;
+  } catch (error) {
+    alert(error.message);
+  }
+}
+
+function execute_convertMsToTime() {
+  const milliseconds = parseInt(document.getElementById('millisecondsInput').value);
+  try {
+    const result = convertMsToTime(milliseconds);
+
+    document.getElementById('daysInput').value = result.days;
+    document.getElementById('hoursInput').value = result.hours;
+    document.getElementById('minutesInput').value = result.minutes;
+    document.getElementById('secondsInput').value = result.seconds;
+    document.getElementById('millisecondsInput2').value = result.milliseconds;
   } catch (error) {
     alert(error.message);
   }

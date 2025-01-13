@@ -198,7 +198,7 @@
     </div>
 
     <div id="convert" class="tab-content">
-      <!-- Convert multiple values -->
+      <!-- Convert temperature -->
       <div class="equal-width">
         <div class="field">
           <label for="cInput">Celcius</label>
@@ -216,6 +216,7 @@
           <input name="fInput" type="number" id="fInput" step="0.1" placeholder="F">
         </div>
       </div>
+      <!-- Convert pressure -->
       <div class="equal-width">
         <div class="field">
           <label for="paInput">Pascals</label>
@@ -231,6 +232,42 @@
         <div class="field">
           <label for="inHgInput">inHg</label>
           <input name="inHgInput" type="number" id="inHgInput" step="0.1" placeholder="inHg">
+        </div>
+      </div>
+      <!-- Convert milliseconds -->
+      <div class="equal-width">
+        <div class="field">
+          <label for="millisecondsInput">Milliseconds</label>
+          <input type="number" id="millisecondsInput" placeholder="Milliseconds">
+        </div>
+        <div class="field-buttons">
+          <label>Milliseconds</label>
+          <div class="button-container">
+            <button class="convert-button" onclick="execute_convertTimeToMs()"><i class="fa-sharp fa-solid fa-circle-chevron-left"></i></button>
+            <button class="convert-button" onclick="execute_convertMsToTime()"><i class="fa-sharp fa-solid fa-circle-chevron-right"></i></button>
+          </div>
+        </div>
+        <div class="equal-width">
+          <div class="field">
+            <label for="daysInput">Days</label>
+            <input type="number" id="daysInput" placeholder="Days">
+          </div>
+          <div class="field">
+            <label for="hoursInput">Hours</label>
+            <input type="number" id="hoursInput" placeholder="Hours">
+          </div>
+          <div class="field">
+            <label for="minutesInput">Minutes</label>
+            <input type="number" id="minutesInput" placeholder="Minutes">
+          </div>
+          <div class="field">
+            <label for="secondsInput">Seconds</label>
+            <input type="number" id="secondsInput" placeholder="Seconds">
+          </div>
+          <div class="field">
+            <label for="millisecondsInput2">Milliseconds</label>
+            <input type="number" id="millisecondsInput2" placeholder="Milliseconds">
+          </div>
         </div>
       </div>
     </div>
