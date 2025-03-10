@@ -329,6 +329,15 @@ document.getElementById('pasteTimestampButton').addEventListener('click', functi
 });
 //#endregion
 
+function copyToClipboard(elementId) {
+  const copyText = document.getElementById(elementId).value;
+  navigator.clipboard.writeText(copyText).then(() => {
+    console.log('Copied to clipboard:', copyText);
+  }).catch(err => {
+    console.error('Failed to copy text: ', err);
+  });
+}
+
 function execute_convertJsonToJson5() {
   const jsonInput = jsonInputEditor.getValue();
   const json5Input = convertJsonToJson5(jsonInput);
