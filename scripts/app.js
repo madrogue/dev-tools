@@ -327,6 +327,12 @@ document.getElementById('copyTimestampButton').addEventListener('click', functio
 document.getElementById('pasteTimestampButton').addEventListener('click', function () {
   pasteTimestamp();
 });
+
+document.getElementById('pasteCurrentButton').addEventListener('click', function () {
+  const currentTimestamp = moment().valueOf();
+  timestampInput.value = currentTimestamp;
+  execute_convertTimestampToDate();
+});
 //#endregion
 
 function copyToClipboard(elementId) {
