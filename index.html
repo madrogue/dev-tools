@@ -25,7 +25,7 @@
       <button class="tab-button active" onclick="openTab(event, 'jsonToJson5')">JSON <i class="fas fa-left-right"></i> JSON5</button>
       <button class="tab-button" onclick="openTab(event, 'stringManipulation')"><i class="fas fa-filter"></i> Strings</button>
       <button class="tab-button" onclick="openTab(event, 'timestampToDate')"><i class="fas fa-clock"></i> Timestamp to Date</button>
-      <button class="tab-button" onclick="openTab(event, 'uuid')"><i class="fas fa-key"></i> UUID</button>
+      <button class="tab-button" onclick="openTab(event, 'uuid')"><i class="fas fa-key"></i> UUID/Token</button>
       <button class="tab-button" onclick="openTab(event, 'convert')"><i class="fas fa-exchange-alt"></i> Convert</button>
     </div>
 
@@ -197,6 +197,26 @@
         <label for="uuidWithoutDashes">UUID (without dashes):</label>
         <input type="text" id="uuidWithoutDashes">
         <button class="action-button" onclick="copyToClipboard('uuidWithoutDashes')"><i class="fas fa-copy"></i></button>
+      </div>
+
+      <!-- Token Generator -->
+      <div class="token-generator">
+        <div class="field">
+          <label for="tokenLength">Length:</label>
+          <input type="number" id="tokenLength" min="1" max="256" value="42" style="width:80px;">
+          <label><input type="checkbox" id="tokenLowercase" checked> a-z</label>
+          <label><input type="checkbox" id="tokenUppercase" checked> A-Z</label>
+          <label><input type="checkbox" id="tokenNumbers" checked> 0-9</label>
+          <label><input type="checkbox" id="tokenSymbols"> Symbols</label>
+        </div>
+        <div class="field">
+          <label for="tokenOutput">Token:</label>
+          <input type="text" id="tokenOutput" readonly>
+        </div>
+        <div class="field">
+          <button class="convert-button" onclick="generateToken()">Refresh Token <i class="fas fa-sync-alt"></i></button>
+          <button class="action-button" onclick="copyToClipboard('tokenOutput')"><i class="fas fa-copy"></i></button>
+        </div>
       </div>
     </div>
 

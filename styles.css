@@ -238,3 +238,22 @@ table>tr>td:first-child:not(.ignored) {
   flex-direction: row;
   gap: 5px;
 }
+
+/* Add to styles.css */
+.token-generator .field {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 10px;
+  flex-wrap: wrap;
+}
+
+.token-generator input[type="text"] {
+  flex: 1;
+  min-width: 200px;
+}
+
+.token-generator label {
+  margin-right: 10px;
+  font-weight: normal;
+}
