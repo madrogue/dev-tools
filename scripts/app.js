@@ -374,6 +374,12 @@ function execute_unquoteStringValue() {
   stringInputEditor.setValue(unquotedValue);
 }
 
+function execute_toggleQuotes() {
+  const input = stringInputEditor.getValue();
+  const output = toggleQuotes(input);
+  stringOutputEditor.setValue(output);
+}
+
 function execute_convertTimestampToDate() {
   const timestampInputValue = timestampInput.value;
   const timezone = timezoneSelect.value;

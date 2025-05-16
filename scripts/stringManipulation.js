@@ -20,3 +20,20 @@ function unquoteString(str) {
     .replace(/\\"/g, '"')
     .replace(/\\\\/g, '\\');
 }
+
+function toggleQuotes(str) {
+  // If starts and ends with double quotes, convert to single quotes
+  if (str.startsWith('"') && str.endsWith('"')) {
+    return "'" + str.slice(1, -1).replace(/'/g, "\\'").replace(/\\"/g, '"') + "'";
+  }
+
+  // If starts and ends with single quotes, convert to double quotes
+  if (str.startsWith("'") && str.endsWith("'")) {
+    return '"' + str.slice(1, -1).replace(/"/g, '\\"').replace(/\\'/g, "'") + '"';
+  }
+
+  // Otherwise, try to convert all double quotes to single quotes and vice versa
+  return str
+    .replace(/"/g, "'")
+    .replace(/'/g, '"');
+}
