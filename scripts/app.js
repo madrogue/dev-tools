@@ -362,6 +362,18 @@ function execute_stripNewlines() {
   stringOutputEditor.setValue(stringOutput);
 }
 
+function execute_newlinesToLiteral() {
+  const input = stringInputEditor.getValue();
+  const output = newlinesToLiteral(input);
+  stringOutputEditor.setValue(output);
+}
+
+function execute_literalToNewlines() {
+  const input = stringOutputEditor.getValue();
+  const output = literalToNewlines(input);
+  stringInputEditor.setValue(output);
+}
+
 function execute_quoteStringValue() {
   const unquotedValue = stringInputEditor.getValue();
   const quotedValue = quoteString(unquotedValue);

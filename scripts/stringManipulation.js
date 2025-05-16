@@ -2,6 +2,14 @@ function stripNewlines(str) {
   return str.replace(/\r?\n|\r/g, '');
 }
 
+function newlinesToLiteral(str) {
+  return str.replace(/\r?\n/g, '\\n');
+}
+
+function literalToNewlines(str) {
+  return str.replace(/\\n/g, '\n');
+}
+
 function quoteString(str) {
   return JSON.stringify(str);
 }

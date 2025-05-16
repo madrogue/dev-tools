@@ -63,8 +63,9 @@
         <div class="editor-container">
           <div class="button-group">
             <button class="convert-button" onclick="execute_stripNewlines()">Strip Newlines <i class="fa-sharp fa-solid fa-circle-chevron-right"></i></button>
+            <button class="convert-button" onclick="execute_newlinesToLiteral()">Newlines to \n <i class="fa-sharp fa-solid fa-circle-chevron-right"></i></button>
             <button class="convert-button" onclick="execute_quoteStringValue()">Quote <i class="fa-sharp fa-solid fa-circle-chevron-right"></i></button>
-            <button class="convert-button" onclick="execute_toggleQuotes()">Toggle Quotes <i class="fa-sharp fa-solid fa-quote-left"></i></button>
+            <button class="convert-button" onclick="execute_toggleQuotes()">Toggle Quotes <i class="fa-sharp fa-solid fa-circle-chevron-right"></i></button>
           </div>
           <div class="button-group">
             <button id="pasteInputStringButton" class="action-button"><i class="fas fa-paste"></i> Paste</button>
@@ -75,6 +76,7 @@
         </div>
         <div class="editor-container">
           <div class="button-group">
+            <button class="convert-button" onclick="execute_literalToNewlines()"><i class="fa-sharp fa-solid fa-circle-chevron-left"></i> \n to Newlines</button>
             <button class="convert-button" onclick="execute_unquoteStringValue()"><i class="fa-sharp fa-solid fa-circle-chevron-left"></i> Unquote</button>
           </div>
           <div class="button-group">
