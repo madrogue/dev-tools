@@ -2,6 +2,8 @@ let jsonInputEditor;
 let json5InputEditor;
 let stringInputEditor;
 let stringOutputEditor;
+let graylogMsgInputEditor;
+let graylogMsgOutputEditor;
 
 let timestampInput = document.getElementById("timestampInput");
 let timezoneSelect = document.getElementById("timezoneSelect");
@@ -212,6 +214,13 @@ function openTab(evt, tabName) {
     if (!stringOutputEditor) {
       stringOutputEditor = initializeEditor("stringOutput", "plaintext");
     }
+  } else if (tabName === "graylog") {
+    if (!graylogMsgInputEditor) {
+      graylogMsgInputEditor = initializeEditor("graylogMsgInput", "plaintext");
+    }
+    if (!graylogMsgOutputEditor) {
+      graylogMsgOutputEditor = initializeEditor("graylogMsgOutput", "json");
+    }
   } else if (tabName === "timestampToDate") {
     // No Monaco Editor initialization needed for this tab
   }
@@ -299,6 +308,16 @@ document.getElementById('copyJson5Button').addEventListener('click', function ()
 document.getElementById('pasteJson5Button').addEventListener('click', function () {
   pasteToEditor(json5InputEditor, execute_convertJson5ToJson);
 });
+
+document.getElementById('pasteGraylogMsgButton').addEventListener('click', async function () {
+  pasteToEditor(graylogMsgInputEditor, execute_parseGraylogMessage);
+});
+document.getElementById('copyGraylogMsgButton').addEventListener('click', function () {
+  copyFromEditor(graylogMsgInputEditor);
+});
+document.getElementById('copyGraylogMsgOutputButton').addEventListener('click', function () {
+  copyFromEditor(graylogMsgOutputEditor);
+});
 //#endregion
 
 //#region String copy/paste buttons
@@ -334,6 +353,18 @@ document.getElementById('pasteCurrentButton').addEventListener('click', function
   execute_convertTimestampToDate();
 });
 //#endregion
+
+document.getElementById('sendGraylogMsgToJsonButton').addEventListener('click', function () {
+  // Get the parsed message from the Graylog output editor
+  const parsedMessage = graylogMsgOutputEditor.getValue();
+  // Switch to the JSON/JSON5 tab
+  openTab(null, 'jsonToJson5');
+  // Paste the parsed message into the JSON editor
+  if (typeof jsonInputEditor !== "undefined") {
+    jsonInputEditor.setValue(parsedMessage);
+    execute_convertJsonToJson5();
+  }
+});
 
 function copyToClipboard(elementId) {
   const copyText = document.getElementById(elementId).value;
@@ -517,5 +548,81 @@ function execute_convertMsToTime() {
     document.getElementById('millisecondsInput2').value = result.milliseconds;
   } catch (error) {
     alert(error.message);
+  }
+}
+
+function execute_parseGraylogMessage() {
+  let input = "";
+  try {
+    input = graylogMsgInputEditor.getValue();
+
+    // Split input into lines, but process as a single string to handle multi-line pastes
+    // We'll scan for all message={...} objects using a brace counter
+    const results = [];
+    let idx = 0;
+    while (idx < input.length) {
+      const msgStart = input.indexOf('message={', idx);
+      if (msgStart === -1) break;
+
+      // To reliably extract the message={...} JSON object (even with nested braces),
+      // we need a parser that matches balanced braces, since regex alone can't do this perfectly.
+      // However, for the Graylog format (where "message={"" always starts a JSON object and
+      // is followed by a comma or end of string), we can use a simple brace counter.
+
+      // Find the full message object by counting braces
+      let braceCount = 0;
+      let inMessage = false;
+      let startIdx = -1;
+      let endIdx = -1;
+      for (let i = msgStart + 8; i < input.length; i++) { // +8 to land on the '='
+        if (!inMessage && input[i] === '{') {
+          inMessage = true;
+          braceCount = 1;
+          startIdx = i;
+          continue;
+        }
+        if (inMessage) {
+          if (input[i] === '{') braceCount++;
+          if (input[i] === '}') braceCount--;
+          if (braceCount === 0) {
+            endIdx = i;
+            break;
+          }
+        }
+      }
+
+      if (startIdx === -1 || endIdx === -1) {
+        // Could not extract, skip to next
+        idx = msgStart + 9;
+        continue;
+      }
+
+      const messageStr = input.substring(startIdx, endIdx + 1);
+
+      // Parse the JSON inside message={}
+      let messageObj;
+      try {
+        messageObj = JSON5.parse(messageStr);
+        results.push(messageObj);
+      } catch (e) {
+        results.push({ error: `Parse error: ${e.message}`, raw: messageStr });
+      }
+
+      idx = endIdx + 1;
+    }
+
+    if (results.length === 0) {
+      graylogMsgOutputEditor.setValue('No message objects found.');
+      return;
+    }
+
+    // Output all message objects as formatted JSON array if more than one, or single object
+    graylogMsgOutputEditor.setValue(
+      results.length === 1
+        ? JSON.stringify(results[0], null, 2)
+        : JSON.stringify(results, null, 2)
+    );
+  } catch (e) {
+    graylogMsgOutputEditor.setValue("Parse error:\n" + e.message);
   }
 }

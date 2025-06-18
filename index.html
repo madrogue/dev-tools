@@ -23,6 +23,7 @@
   <div class="container">
     <div class="tabs">
       <button class="tab-button active" onclick="openTab(event, 'jsonToJson5')">JSON <i class="fas fa-left-right"></i> JSON5</button>
+      <button class="tab-button" onclick="openTab(event, 'graylog')"><i class="fas fa-envelope"></i> Graylog</button>
       <button class="tab-button" onclick="openTab(event, 'stringManipulation')"><i class="fas fa-filter"></i> Strings</button>
       <button class="tab-button" onclick="openTab(event, 'timestampToDate')"><i class="fas fa-clock"></i> Timestamp to Date</button>
       <button class="tab-button" onclick="openTab(event, 'uuid')"><i class="fas fa-key"></i> UUID/Token</button>
@@ -53,6 +54,28 @@
           </div>
           <!-- <textarea id="json5Input" placeholder="JSON5"></textarea> -->
           <div id="json5Input" class="code-editor"></div>
+        </div>
+      </div>
+    </div>
+
+    <div id="graylog" class="tab-content">
+      <div class="side-by-side">
+        <div class="editor-container">
+          <div class="button-group">
+            <button class="convert-button" onclick="execute_parseGraylogMessage()">Parse <i class="fa-sharp fa-solid fa-circle-chevron-right"></i></button>
+          </div>
+          <div class="button-group">
+            <button id="pasteGraylogMsgButton" class="action-button"><i class="fas fa-paste"></i> Paste</button>
+            <button id="copyGraylogMsgButton" class="action-button"><i class="fas fa-copy"></i> Copy</button>
+          </div>
+          <div id="graylogMsgInput" class="code-editor"></div>
+        </div>
+        <div class="editor-container">
+          <div class="button-group">
+            <button id="copyGraylogMsgOutputButton" class="action-button"><i class="fas fa-copy"></i> Copy</button>
+            <button id="sendGraylogMsgToJsonButton" class="action-button"><i class="fas fa-arrow-right"></i> To JSON Tab</button>
+          </div>
+          <div id="graylogMsgOutput" class="code-editor"></div>
         </div>
       </div>
     </div>
