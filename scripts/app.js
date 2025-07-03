@@ -446,6 +446,13 @@ function execute_convertTimestampToDate() {
   document.getElementById('timestampDisplayGmt').textContent = moment.utc(result.timestamp).format('ddd MMM DD YYYY HH:mm:ss [GMT]ZZ');
   document.getElementById('timestampDisplayLocal').textContent = moment.tz(result.timestamp, timezone).format('ddd MMM DD YYYY HH:mm:ss [GMT]ZZ (z)');
   document.getElementById('timestampDisplayRelative').textContent = moment(result.timestamp).fromNow();
+
+  const ms = parseInt(document.getElementById('timestampInput').value);
+  if (!isNaN(ms)) {
+    document.getElementById('timestampDisplayDuration').textContent = formatDuration(ms);
+  } else {
+    document.getElementById('timestampDisplayDuration').textContent = '';
+  }
 }
 
 function execute_convertDatePartsToTimestamp() {
