@@ -1,3 +1,48 @@
+/* JSON Schema Tools tab styles */
+#jsonSchemaTools .side-by-side {
+  display: flex;
+  gap: 1rem;
+}
+
+#jsonSchemaTools .editor-container {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+#jsonSchemaTools .code-editor {
+  height: 300px;
+  min-height: 200px;
+  border: 1px solid #333;
+  border-radius: 4px;
+  margin-top: 0.5rem;
+  background: #1e1e1e;
+}
+
+#jsonSchemaTools .button-group {
+  margin-bottom: 0.5rem;
+}
+
+.validation-result {
+  margin-top: 0.5rem;
+  padding: 0.5em 1em;
+  border-radius: 4px;
+  font-weight: bold;
+}
+
+.validation-result.success {
+  background: #e0ffe0;
+  color: #207520;
+  border: 1px solid #207520;
+}
+
+.validation-result.error {
+  background: #ffe0e0;
+  color: #a00000;
+  border: 1px solid #a00000;
+}
+
 html,
 body {
   font-family: 'Fira Code', monospace;
@@ -190,7 +235,7 @@ table>tr>td:first-child:not(.ignored) {
 /****************************************************
  * Form styles
  ****************************************************/
- .equal-width {
+.equal-width {
   display: flex;
   flex-wrap: wrap;
   gap: 5px;

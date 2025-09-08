@@ -4,6 +4,8 @@ let stringInputEditor;
 let stringOutputEditor;
 let graylogMsgInputEditor;
 let graylogMsgOutputEditor;
+let jsonSchemaObjectEditor;
+let jsonSchemaEditor;
 
 let timestampInput = document.getElementById("timestampInput");
 let timezoneSelect = document.getElementById("timezoneSelect");
@@ -221,6 +223,13 @@ function openTab(evt, tabName) {
     if (!graylogMsgOutputEditor) {
       graylogMsgOutputEditor = initializeEditor("graylogMsgOutput", "json");
     }
+  } else if (tabName === "jsonSchemaTools") {
+    if (!jsonSchemaObjectEditor) {
+      jsonSchemaObjectEditor = initializeEditor("jsonSchemaObject", "json");
+    }
+    if (!jsonSchemaEditor) {
+      jsonSchemaEditor = initializeEditor("jsonSchema", "json");
+    }
   } else if (tabName === "timestampToDate") {
     // No Monaco Editor initialization needed for this tab
   }
@@ -246,6 +255,12 @@ document.addEventListener("keydown", function (e) {
           tidyEditor(stringInputEditor);
         } else if (document.getElementById('stringOutput').parentElement.classList.contains('active')) {
           tidyEditor(stringOutputEditor);
+        } else if (document.getElementById('graylogMsgInput').parentElement.classList.contains('active')) {
+          tidyEditor(graylogMsgInputEditor);
+        } else if (document.getElementById('jsonSchemaInput').parentElement.classList.contains('active')) {
+          tidyEditor(jsonSchemaInputEditor);
+        } else if (document.getElementById('jsonSchemaOutput').parentElement.classList.contains('active')) {
+          tidyEditor(jsonSchemaOutputEditor);
         }
       }
     },
@@ -317,6 +332,13 @@ document.getElementById('copyGraylogMsgButton').addEventListener('click', functi
 });
 document.getElementById('copyGraylogMsgOutputButton').addEventListener('click', function () {
   copyFromEditor(graylogMsgOutputEditor);
+});
+
+document.getElementById('copyObjectButton').addEventListener('click', function () {
+  copyFromEditor(jsonSchemaObjectEditor);
+});
+document.getElementById('copySchemaButton').addEventListener('click', function () {
+  copyFromEditor(jsonSchemaEditor);
 });
 //#endregion
 
@@ -631,5 +653,72 @@ function execute_parseGraylogMessage() {
     );
   } catch (e) {
     graylogMsgOutputEditor.setValue("Parse error:\n" + e.message);
+  }
+}
+
+function execute_generateJsonSchema() {
+  try {
+    const obj = JSON.parse(jsonSchemaObjectEditor.getValue());
+    const schema = objectToJsonSchema(obj);
+    jsonSchemaEditor.setValue(JSON.stringify(schema, null, 2));
+    showValidationResult('Schema generated!', 'success');
+  } catch (e) {
+    showValidationResult('Invalid object: ' + e.message, 'error');
+  }
+}
+
+function execute_validateObjectAgainstSchema() {
+  try {
+    const obj = JSON.parse(jsonSchemaObjectEditor.getValue());
+    const schema = JSON.parse(jsonSchemaEditor.getValue());
+    const ajv = new window.Ajv7({ allErrors: true, strict: false });
+    const validate = ajv.compile(schema);
+    const valid = validate(obj);
+    if (valid) {
+      showValidationResult('Valid!', 'success');
+    } else {
+      showValidationResult('Invalid: ' + ajv.errorsText(validate.errors), 'error');
+    }
+  } catch (e) {
+    showValidationResult('Validation error: ' + e.message, 'error');
+  }
+}
+
+function execute_generateObjectFromSchema() {
+  try {
+    const schema = JSON.parse(jsonSchemaEditor.getValue());
+    const obj = window.jsf.generate(schema);
+    jsonSchemaObjectEditor.setValue(JSON.stringify(obj, null, 2));
+    showValidationResult('Object generated!', 'success');
+  } catch (e) {
+    showValidationResult('Generation error: ' + e.message, 'error');
+  }
+}
+
+function showValidationResult(msg, type) {
+  const el = document.getElementById('validationResult');
+  el.textContent = msg;
+  el.className = 'validation-result ' + type;
+}
+
+// Simple object to JSON Schema generator (basic types only)
+function objectToJsonSchema(obj) {
+  if (Array.isArray(obj)) {
+    return {
+      type: 'array',
+      items: objectToJsonSchema(obj[0] ?? {})
+    };
+  } else if (typeof obj === 'object' && obj !== null) {
+    const properties = {};
+    for (const key in obj) {
+      properties[key] = objectToJsonSchema(obj[key]);
+    }
+    return {
+      type: 'object',
+      properties,
+      required: Object.keys(properties)
+    };
+  } else {
+    return { type: typeof obj };
   }
 }
