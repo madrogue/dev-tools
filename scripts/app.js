@@ -684,6 +684,24 @@ function execute_validateObjectAgainstSchema() {
   }
 }
 
+function execute_generateDalMap() {
+  try {
+    const obj = JSON.parse(jsonSchemaObjectEditor.getValue());
+    
+    // For DAL map, we just need the top-level keys of the object
+    // Assuming the object is a flat key-value structure
+    if (typeof obj !== 'object' || obj === null || Array.isArray(obj)) {
+      throw new Error('Input must be a JSON object');
+    }
+    const dalMap = Object.keys(obj);
+
+    jsonSchemaEditor.setValue(JSON.stringify(dalMap, null, 2));
+    showValidationResult('DAL map generated!', 'success');
+  } catch (e) {
+    showValidationResult('Generation error: ' + e.message, 'error');
+  }
+}
+
 function execute_generateObjectFromSchema() {
   try {
     const schema = JSON.parse(jsonSchemaEditor.getValue());

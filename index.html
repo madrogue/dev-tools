@@ -348,8 +348,9 @@
       <div class="side-by-side">
         <div class="editor-container">
           <div class="button-group">
-            <button class="convert-button" onclick="generateJsonSchema()">Generate Schema <i class="fas fa-arrow-right"></i></button>
-            <button class="convert-button" onclick="validateObjectAgainstSchema()">Validate <i class="fas fa-check"></i></button>
+            <button class="convert-button" onclick="execute_generateJsonSchema()">Generate Schema <i class="fas fa-arrow-right"></i></button>
+            <button class="convert-button" onclick="execute_generateDalMap()">DAL map <i class="fas fa-arrow-right"></i></button>
+            <button class="convert-button" onclick="execute_validateObjectAgainstSchema()">Validate <i class="fas fa-check"></i></button>
           </div>
           <div class="button-group">
             <button id="pasteObjectButton" class="action-button"><i class="fas fa-paste"></i> Paste</button>
@@ -360,7 +361,7 @@
         </div>
         <div class="editor-container">
           <div class="button-group">
-            <button class="convert-button" onclick="generateObjectFromSchema()"><i class="fas fa-arrow-left"></i> Generate Object</button>
+            <button class="convert-button" onclick="execute_generateObjectFromSchema()"><i class="fas fa-arrow-left"></i> Generate Object</button>
           </div>
           <div class="button-group">
             <button id="pasteSchemaButton" class="action-button"><i class="fas fa-paste"></i> Paste</button>
