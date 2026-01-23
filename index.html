@@ -353,9 +353,21 @@
       <div class="side-by-side">
         <div class="editor-container">
           <div class="button-group">
-            <button class="convert-button" onclick="execute_generateJsonSchema()">Generate Schema <i class="fas fa-arrow-right"></i></button>
-            <button class="convert-button" onclick="execute_generateDalMap()">DAL map <i class="fas fa-arrow-right"></i></button>
-            <button class="convert-button" onclick="execute_validateObjectAgainstSchema()">Validate <i class="fas fa-check"></i></button>
+            <select id="jsonSchemaFunctionSelect">
+              <option value="generateJsonSchema">Generate JSON Schema</option>
+              <option value="generateFormSchema">Generate Form Schema</option>
+              <option value="generateDalMap">Generate DAL Map</option>
+              <option value="flattenNestedSchema">Flatten Nested Schema</option>
+              <option value="mergeSchemas">Merge Schemas (with right pane)</option>
+              <option value="schemaDiff">Schema Diff (with right pane)</option>
+              <option value="generateTypeScript">Generate TypeScript Interfaces</option>
+              <option value="generateOpenApi">Generate OpenAPI Schema</option>
+              <option value="generateMockData">Generate Mock Data</option>
+              <option value="generateCsvTemplate">Generate CSV Template</option>
+              <option value="simplifySchema">Simplify Schema</option>
+              <option value="validateObjectAgainstSchema">Validate Object</option>
+            </select>
+            <button class="convert-button" onclick="execute_applyJsonSchemaFunction()">Apply <i class="fa-sharp fa-solid fa-circle-chevron-right"></i></button>
           </div>
           <div class="button-group">
             <button id="pasteObjectButton" class="action-button"><i class="fas fa-paste"></i> Paste</button>
@@ -366,7 +378,10 @@
         </div>
         <div class="editor-container">
           <div class="button-group">
-            <button class="convert-button" onclick="execute_generateObjectFromSchema()"><i class="fas fa-arrow-left"></i> Generate Object</button>
+            <select id="jsonSchemaReverseFunctionSelect">
+              <option value="generateObjectFromSchema">Generate Object from Schema</option>
+            </select>
+            <button class="convert-button" onclick="execute_applyJsonSchemaReverseFunction()"><i class="fa-sharp fa-solid fa-circle-chevron-left"></i> Apply</button>
           </div>
           <div class="button-group">
             <button id="pasteSchemaButton" class="action-button"><i class="fas fa-paste"></i> Paste</button>

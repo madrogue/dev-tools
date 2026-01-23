@@ -334,8 +334,14 @@ document.getElementById('copyGraylogMsgOutputButton').addEventListener('click', 
   copyFromEditor(graylogMsgOutputEditor);
 });
 
+document.getElementById('pasteObjectButton').addEventListener('click', function () {
+  pasteToEditor(jsonSchemaObjectEditor);
+});
 document.getElementById('copyObjectButton').addEventListener('click', function () {
   copyFromEditor(jsonSchemaObjectEditor);
+});
+document.getElementById('pasteSchemaButton').addEventListener('click', function () {
+  pasteToEditor(jsonSchemaEditor);
 });
 document.getElementById('copySchemaButton').addEventListener('click', function () {
   copyFromEditor(jsonSchemaEditor);
@@ -660,6 +666,61 @@ function execute_parseGraylogMessage() {
   }
 }
 
+function execute_applyJsonSchemaFunction() {
+  const functionSelect = document.getElementById('jsonSchemaFunctionSelect');
+  const selectedFunction = functionSelect.value;
+
+  switch(selectedFunction) {
+    case 'generateJsonSchema':
+      execute_generateJsonSchema();
+      break;
+    case 'generateFormSchema':
+      execute_generateFormSchema();
+      break;
+    case 'generateDalMap':
+      execute_generateDalMap();
+      break;
+    case 'flattenNestedSchema':
+      execute_flattenNestedSchema();
+      break;
+    case 'mergeSchemas':
+      execute_mergeSchemas();
+      break;
+    case 'schemaDiff':
+      execute_schemaDiff();
+      break;
+    case 'generateTypeScript':
+      execute_generateTypeScript();
+      break;
+    case 'generateOpenApi':
+      execute_generateOpenApi();
+      break;
+    case 'generateMockData':
+      execute_generateMockData();
+      break;
+    case 'generateCsvTemplate':
+      execute_generateCsvTemplate();
+      break;
+    case 'simplifySchema':
+      execute_simplifySchema();
+      break;
+    case 'validateObjectAgainstSchema':
+      execute_validateObjectAgainstSchema();
+      break;
+  }
+}
+
+function execute_applyJsonSchemaReverseFunction() {
+  const functionSelect = document.getElementById('jsonSchemaReverseFunctionSelect');
+  const selectedFunction = functionSelect.value;
+
+  switch(selectedFunction) {
+    case 'generateObjectFromSchema':
+      execute_generateObjectFromSchema();
+      break;
+  }
+}
+
 function execute_generateJsonSchema() {
   try {
     const obj = JSON.parse(jsonSchemaObjectEditor.getValue());
@@ -668,6 +729,61 @@ function execute_generateJsonSchema() {
     showValidationResult('Schema generated!', 'success');
   } catch (e) {
     showValidationResult('Invalid object: ' + e.message, 'error');
+  }
+}
+
+function execute_generateFormSchema() {
+  try {
+    let input = jsonSchemaObjectEditor.getValue();
+    let obj = JSON.parse(input);
+    let jsonSchema;
+
+    // Check if input is already a JSON schema (has 'type' and 'properties')
+    if (obj.type === 'object' && obj.properties) {
+      jsonSchema = obj;
+    } else {
+      // Generate JSON schema from object
+      jsonSchema = objectToJsonSchema(obj);
+    }
+
+    const formSchema = generateFormSchema(jsonSchema);
+    jsonSchemaEditor.setValue(JSON.stringify(formSchema, null, 2));
+    showValidationResult('Form schema generated!', 'success');
+  } catch (e) {
+    showValidationResult('Generation error: ' + e.message, 'error');
+  }
+}
+
+function execute_validateObjectAgainstSchema() {
+  try {
+    const obj = JSON.parse(jsonSchemaObjectEditor.getValue());
+    const schema = objectToJsonSchema(obj);
+    jsonSchemaEditor.setValue(JSON.stringify(schema, null, 2));
+    showValidationResult('Schema generated!', 'success');
+  } catch (e) {
+    showValidationResult('Invalid object: ' + e.message, 'error');
+  }
+}
+
+function execute_generateFormSchema() {
+  try {
+    let input = jsonSchemaObjectEditor.getValue();
+    let obj = JSON.parse(input);
+    let jsonSchema;
+
+    // Check if input is already a JSON schema (has 'type' and 'properties')
+    if (obj.type === 'object' && obj.properties) {
+      jsonSchema = obj;
+    } else {
+      // Generate JSON schema from object
+      jsonSchema = objectToJsonSchema(obj);
+    }
+
+    const formSchema = generateFormSchema(jsonSchema);
+    jsonSchemaEditor.setValue(JSON.stringify(formSchema, null, 2));
+    showValidationResult('Form schema generated!', 'success');
+  } catch (e) {
+    showValidationResult('Generation error: ' + e.message, 'error');
   }
 }
 
@@ -691,7 +807,7 @@ function execute_validateObjectAgainstSchema() {
 function execute_generateDalMap() {
   try {
     const obj = JSON.parse(jsonSchemaObjectEditor.getValue());
-    
+
     // For DAL map, we just need the top-level keys of the object
     // Assuming the object is a flat key-value structure
     if (typeof obj !== 'object' || obj === null || Array.isArray(obj)) {
@@ -721,6 +837,472 @@ function showValidationResult(msg, type) {
   const el = document.getElementById('validationResult');
   el.textContent = msg;
   el.className = 'validation-result ' + type;
+}
+
+// Generate a form schema from a JSON schema
+function generateFormSchema(jsonSchema) {
+  const formSchema = {
+    component: "FORM",
+    container: "main",
+    data: "params",
+    values: "data:load/{{__key}}",
+    mask: true,
+    schema: {
+      json: jsonSchema,
+      ui: {}
+    },
+    buttons: [
+      {
+        text: "Close",
+        icon: "fas:times-circle",
+        align: "right",
+        onClick: {
+          action: "close"
+        }
+      },
+      {
+        text: "Save",
+        icon: "fas:check-circle",
+        align: "right",
+        onClick: {
+          action: "post",
+          target: {
+            uri: "data:save"
+          },
+          params: "{{{{$values}}}}",
+          options: {
+            validate: true,
+            close: true
+          }
+        }
+      }
+    ]
+  };
+
+  // Generate basic UI schema from JSON schema properties
+  if (jsonSchema.properties) {
+    for (const [key, prop] of Object.entries(jsonSchema.properties)) {
+      const uiField = {};
+
+      // Determine field type based on JSON schema type
+      const propType = Array.isArray(prop.type) ? prop.type[0] : prop.type;
+
+      // Add title
+      uiField["ui:title"] = prop.title || key.charAt(0).toUpperCase() + key.slice(1).replace(/_/g, ' ');
+
+      // Determine field widget
+      switch(propType) {
+        case 'string':
+          uiField["ui:field"] = "text";
+          break;
+        case 'number':
+        case 'integer':
+          uiField["ui:field"] = "numeric";
+          break;
+        case 'boolean':
+          uiField["ui:field"] = "checkbox";
+          break;
+        case 'array':
+          uiField["ui:field"] = "array";
+          break;
+        case 'object':
+          uiField["ui:field"] = "object";
+          break;
+      }
+
+      // Add default value if present
+      if (prop.default !== undefined) {
+        uiField["ui:default"] = prop.default;
+      }
+
+      formSchema.schema.ui[key] = uiField;
+    }
+  }
+
+  return formSchema;
+}
+
+function execute_flattenNestedSchema() {
+  try {
+    const schema = JSON.parse(jsonSchemaObjectEditor.getValue());
+    const flattened = flattenSchema(schema);
+    jsonSchemaEditor.setValue(JSON.stringify(flattened, null, 2));
+    showValidationResult('Schema flattened!', 'success');
+  } catch (e) {
+    showValidationResult('Error: ' + e.message, 'error');
+  }
+}
+
+function execute_mergeSchemas() {
+  try {
+    const schema1 = JSON.parse(jsonSchemaObjectEditor.getValue());
+    const schema2 = JSON.parse(jsonSchemaEditor.getValue());
+    const merged = mergeSchemas(schema1, schema2);
+    jsonSchemaEditor.setValue(JSON.stringify(merged, null, 2));
+    showValidationResult('Schemas merged!', 'success');
+  } catch (e) {
+    showValidationResult('Error: ' + e.message, 'error');
+  }
+}
+
+function execute_schemaDiff() {
+  try {
+    const schema1 = JSON.parse(jsonSchemaObjectEditor.getValue());
+    const schema2 = JSON.parse(jsonSchemaEditor.getValue());
+    const diff = schemaDiff(schema1, schema2);
+    jsonSchemaEditor.setValue(JSON.stringify(diff, null, 2));
+    showValidationResult('Diff generated!', 'success');
+  } catch (e) {
+    showValidationResult('Error: ' + e.message, 'error');
+  }
+}
+
+function execute_generateTypeScript() {
+  try {
+    const input = jsonSchemaObjectEditor.getValue();
+    const obj = JSON.parse(input);
+    let schema;
+
+    if (obj.type && obj.properties) {
+      schema = obj;
+    } else {
+      schema = objectToJsonSchema(obj);
+    }
+
+    const typescript = generateTypeScriptInterfaces(schema);
+    jsonSchemaEditor.setValue(typescript);
+    showValidationResult('TypeScript interfaces generated!', 'success');
+  } catch (e) {
+    showValidationResult('Error: ' + e.message, 'error');
+  }
+}
+
+function execute_generateOpenApi() {
+  try {
+    const input = jsonSchemaObjectEditor.getValue();
+    const obj = JSON.parse(input);
+    let schema;
+
+    if (obj.type && obj.properties) {
+      schema = obj;
+    } else {
+      schema = objectToJsonSchema(obj);
+    }
+
+    const openApi = generateOpenApiSchema(schema);
+    jsonSchemaEditor.setValue(JSON.stringify(openApi, null, 2));
+    showValidationResult('OpenAPI schema generated!', 'success');
+  } catch (e) {
+    showValidationResult('Error: ' + e.message, 'error');
+  }
+}
+
+function execute_generateMockData() {
+  try {
+    const input = jsonSchemaObjectEditor.getValue();
+    const obj = JSON.parse(input);
+    let schema;
+
+    if (obj.type && obj.properties) {
+      schema = obj;
+    } else {
+      schema = objectToJsonSchema(obj);
+    }
+
+    const mockData = generateMockDataFromSchema(schema);
+    jsonSchemaEditor.setValue(JSON.stringify(mockData, null, 2));
+    showValidationResult('Mock data generated!', 'success');
+  } catch (e) {
+    showValidationResult('Error: ' + e.message, 'error');
+  }
+}
+
+function execute_generateCsvTemplate() {
+  try {
+    const input = jsonSchemaObjectEditor.getValue();
+    const obj = JSON.parse(input);
+    let schema;
+
+    if (obj.type && obj.properties) {
+      schema = obj;
+    } else {
+      schema = objectToJsonSchema(obj);
+    }
+
+    const csv = generateCsvTemplate(schema);
+    jsonSchemaEditor.setValue(csv);
+    showValidationResult('CSV template generated!', 'success');
+  } catch (e) {
+    showValidationResult('Error: ' + e.message, 'error');
+  }
+}
+
+function execute_simplifySchema() {
+  try {
+    const schema = JSON.parse(jsonSchemaObjectEditor.getValue());
+    const simplified = simplifySchema(schema);
+    jsonSchemaEditor.setValue(JSON.stringify(simplified, null, 2));
+    showValidationResult('Schema simplified!', 'success');
+  } catch (e) {
+    showValidationResult('Error: ' + e.message, 'error');
+  }
+}
+
+// Helper functions for new features
+function flattenSchema(schema, prefix = '', result = {}) {
+  if (schema.type === 'object' && schema.properties) {
+    for (const [key, prop] of Object.entries(schema.properties)) {
+      const newKey = prefix ? `${prefix}.${key}` : key;
+      if (prop.type === 'object' && prop.properties) {
+        flattenSchema(prop, newKey, result);
+      } else {
+        result[newKey] = prop;
+      }
+    }
+  }
+
+  return {
+    type: 'object',
+    properties: result
+  };
+}
+
+function mergeSchemas(schema1, schema2) {
+  const merged = JSON.parse(JSON.stringify(schema1));
+
+  if (schema2.properties && merged.properties) {
+    merged.properties = { ...merged.properties, ...schema2.properties };
+  }
+
+  if (schema2.required && merged.required) {
+    merged.required = [...new Set([...merged.required, ...schema2.required])];
+  } else if (schema2.required) {
+    merged.required = schema2.required;
+  }
+
+  return merged;
+}
+
+function schemaDiff(schema1, schema2) {
+  const diff = {
+    added: [],
+    removed: [],
+    modified: []
+  };
+
+  const props1 = schema1.properties || {};
+  const props2 = schema2.properties || {};
+
+  // Find added properties
+  for (const key in props2) {
+    if (!(key in props1)) {
+      diff.added.push({ key, schema: props2[key] });
+    }
+  }
+
+  // Find removed properties
+  for (const key in props1) {
+    if (!(key in props2)) {
+      diff.removed.push({ key, schema: props1[key] });
+    }
+  }
+
+  // Find modified properties
+  for (const key in props1) {
+    if (key in props2) {
+      const json1 = JSON.stringify(props1[key]);
+      const json2 = JSON.stringify(props2[key]);
+      if (json1 !== json2) {
+        diff.modified.push({ key, before: props1[key], after: props2[key] });
+      }
+    }
+  }
+
+  return diff;
+}
+
+function generateTypeScriptInterfaces(schema, interfaceName = 'Root') {
+  let typescript = '';
+
+  if (schema.type === 'object' && schema.properties) {
+    typescript += `interface ${interfaceName} {\n`;
+
+    for (const [key, prop] of Object.entries(schema.properties)) {
+      const optional = schema.required && !schema.required.includes(key) ? '?' : '';
+      const propType = Array.isArray(prop.type) ? prop.type[0] : prop.type;
+
+      let tsType;
+      switch(propType) {
+        case 'string':
+          tsType = 'string';
+          break;
+        case 'number':
+        case 'integer':
+          tsType = 'number';
+          break;
+        case 'boolean':
+          tsType = 'boolean';
+          break;
+        case 'array':
+          tsType = 'any[]';
+          break;
+        case 'object':
+          tsType = 'object';
+          break;
+        default:
+          tsType = 'any';
+      }
+
+      typescript += `  ${key}${optional}: ${tsType};\n`;
+    }
+
+    typescript += '}\n';
+  }
+
+  return typescript;
+}
+
+function generateOpenApiSchema(schema) {
+  return {
+    openapi: '3.0.0',
+    info: {
+      title: 'Generated API',
+      version: '1.0.0'
+    },
+    paths: {
+      '/resource': {
+        get: {
+          summary: 'Get resource',
+          responses: {
+            '200': {
+              description: 'Successful response',
+              content: {
+                'application/json': {
+                  schema: schema
+                }
+              }
+            }
+          }
+        },
+        post: {
+          summary: 'Create resource',
+          requestBody: {
+            required: true,
+            content: {
+              'application/json': {
+                schema: schema
+              }
+            }
+          },
+          responses: {
+            '201': {
+              description: 'Resource created',
+              content: {
+                'application/json': {
+                  schema: schema
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    components: {
+      schemas: {
+        Resource: schema
+      }
+    }
+  };
+}
+
+function generateMockDataFromSchema(schema) {
+  if (schema.type === 'object' && schema.properties) {
+    const mockData = {};
+
+    for (const [key, prop] of Object.entries(schema.properties)) {
+      const propType = Array.isArray(prop.type) ? prop.type[0] : prop.type;
+
+      if (prop.default !== undefined) {
+        mockData[key] = prop.default;
+      } else {
+        switch(propType) {
+          case 'string':
+            mockData[key] = `sample_${key}`;
+            break;
+          case 'number':
+          case 'integer':
+            mockData[key] = 42;
+            break;
+          case 'boolean':
+            mockData[key] = true;
+            break;
+          case 'array':
+            mockData[key] = [];
+            break;
+          case 'object':
+            mockData[key] = {};
+            break;
+          default:
+            mockData[key] = null;
+        }
+      }
+    }
+
+    return mockData;
+  }
+
+  return {};
+}
+
+function generateCsvTemplate(schema) {
+  if (schema.type === 'object' && schema.properties) {
+    const headers = Object.keys(schema.properties);
+    const csvHeaders = headers.join(',');
+    const sampleRow = headers.map(key => {
+      const prop = schema.properties[key];
+      const propType = Array.isArray(prop.type) ? prop.type[0] : prop.type;
+
+      switch(propType) {
+        case 'string':
+          return `"sample_${key}"`;
+        case 'number':
+        case 'integer':
+          return '0';
+        case 'boolean':
+          return 'true';
+        default:
+          return '';
+      }
+    }).join(',');
+
+    return `${csvHeaders}\n${sampleRow}`;
+  }
+
+  return '';
+}
+
+function simplifySchema(schema) {
+  const simplified = JSON.parse(JSON.stringify(schema));
+
+  function removeMetadata(obj) {
+    if (typeof obj !== 'object' || obj === null) return;
+
+    delete obj.description;
+    delete obj.title;
+    delete obj.examples;
+    delete obj.$comment;
+    delete obj.$id;
+    delete obj.$schema;
+
+    for (const key in obj) {
+      if (typeof obj[key] === 'object') {
+        removeMetadata(obj[key]);
+      }
+    }
+  }
+
+  removeMetadata(simplified);
+  return simplified;
 }
 
 // Simple object to JSON Schema generator (basic types only)
