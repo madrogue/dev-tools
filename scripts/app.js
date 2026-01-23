@@ -704,6 +704,9 @@ function execute_applyJsonSchemaFunction() {
     case 'simplifySchema':
       execute_simplifySchema();
       break;
+    case 'generateTableComponent':
+      execute_generateTableComponent();
+      break;
     case 'validateObjectAgainstSchema':
       execute_validateObjectAgainstSchema();
       break;
@@ -1048,6 +1051,28 @@ function execute_simplifySchema() {
   }
 }
 
+function execute_generateTableComponent() {
+  try {
+    const input = jsonSchemaObjectEditor.getValue();
+    const obj = JSON.parse(input);
+    let schema;
+
+    // Check if input is already a JSON schema
+    if (obj.type && obj.properties) {
+      schema = obj;
+    } else {
+      // Generate JSON schema from object first
+      schema = objectToJsonSchema(obj);
+    }
+
+    const tableComponent = generateTableComponent(schema, obj);
+    jsonSchemaEditor.setValue(JSON.stringify(tableComponent, null, 2));
+    showValidationResult('Table component generated!', 'success');
+  } catch (e) {
+    showValidationResult('Error: ' + e.message, 'error');
+  }
+}
+
 // Helper functions for new features
 function flattenSchema(schema, prefix = '', result = {}) {
   if (schema.type === 'object' && schema.properties) {
@@ -1303,6 +1328,120 @@ function simplifySchema(schema) {
 
   removeMetadata(simplified);
   return simplified;
+}
+
+function generateTableComponent(schema, sampleData) {
+  if (schema.type !== 'object' || !schema.properties) {
+    throw new Error('Schema must be an object type with properties');
+  }
+
+  const properties = schema.properties;
+  const columns = [];
+
+  // Generate columns from schema properties
+  for (const [key, propSchema] of Object.entries(properties)) {
+    const propType = Array.isArray(propSchema.type) ? propSchema.type[0] : propSchema.type;
+
+    const column = {
+      header: propSchema.title || key.charAt(0).toUpperCase() + key.slice(1).replace(/([A-Z])/g, ' $1').trim(),
+      width: '100px',
+      minwidth: '100px',
+      cell: {
+        autoEllipsis: true,
+        tooltip: true,
+        value: `{{{${key}}}}`
+      },
+      sort: {
+        datakey: key,
+        direction: 'ASC'
+      },
+      filter: 'contains'
+    };
+
+    // Add type-specific styling
+    if (propType === 'boolean') {
+      column.cell.style = {
+        color: `{{{ iif ${key} 'green' 'red'}}}`,
+        fontWeight: 'bold'
+      };
+    } else if (propType === 'number' || propType === 'integer') {
+      column.cell.style = {
+        textAlign: 'right'
+      };
+    }
+
+    columns.push(column);
+  }
+
+  // Build the table component
+  const tableComponent = {
+    component: 'TABLE',
+    container: 'main',
+    placeholder: 'No data available',
+    data: 'data/items',
+    datakey: '__key',
+    command: 'tablecommand',
+    name: 'datatable',
+    options: {
+      checkbox: true,
+      multi: true,
+      sticky: {
+        selected: true
+      }
+    },
+    filter: {
+      hide: false
+    },
+    sticky: {
+      sort: true,
+      position: true,
+      filter: true
+    },
+    header: 'Table Header',
+    rows: {
+      height: '32px',
+      style: [
+        {
+          backgroundColor: '#ffffff'
+        },
+        {
+          backgroundColor: '#fafafa'
+        }
+      ],
+      selected: {
+        fontWeight: 'bold'
+      },
+      active: {
+        backgroundColor: '#cccccc'
+      }
+    },
+    columns: columns,
+    buttons: [
+      {
+        align: 'left',
+        icon: 'fa-filter',
+        tooltip: {
+          text: 'Filter',
+          direction: 'up-left'
+        },
+        action: 'filter'
+      },
+      {
+        align: 'left',
+        icon: 'fa-sync-alt',
+        color: 'primary',
+        tooltip: {
+          text: 'Refresh',
+          direction: 'up-left'
+        },
+        onClick: {
+          action: 'refresh'
+        }
+      }
+    ]
+  };
+
+  return tableComponent;
 }
 
 // Simple object to JSON Schema generator (basic types only)
