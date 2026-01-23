@@ -92,13 +92,20 @@
     <!--String Tools-->
     <!-------------------------------------------------------------->
     <div id="stringManipulation" class="tab-content">
+      <!--String Manipulation-->
       <div class="side-by-side">
         <div class="editor-container">
           <div class="button-group">
-            <button class="convert-button" onclick="execute_stripNewlines()">Strip Newlines <i class="fa-sharp fa-solid fa-circle-chevron-right"></i></button>
-            <button class="convert-button" onclick="execute_newlinesToLiteral()">Newlines to \n <i class="fa-sharp fa-solid fa-circle-chevron-right"></i></button>
-            <button class="convert-button" onclick="execute_quoteStringValue()">Quote <i class="fa-sharp fa-solid fa-circle-chevron-right"></i></button>
-            <button class="convert-button" onclick="execute_toggleQuotes()">Toggle Quotes <i class="fa-sharp fa-solid fa-circle-chevron-right"></i></button>
+            <select id="stringFunctionSelect">
+              <option value="stripNewlines">Strip Newlines</option>
+              <option value="newlinesToLiteral">Newlines to \n</option>
+              <option value="literalToNewlines">\n to Newlines</option>
+              <option value="quoteString">Quote</option>
+              <option value="unquoteString">Unquote</option>
+              <option value="toggleQuotes">Toggle Quotes</option>
+              <option value="parseStringifiedJson">Parse Stringified JSON</option>
+            </select>
+            <button class="convert-button" onclick="execute_applyStringManipulation()">Apply <i class="fa-sharp fa-solid fa-circle-chevron-right"></i></button>
           </div>
           <div class="button-group">
             <button id="pasteInputStringButton" class="action-button"><i class="fas fa-paste"></i> Paste</button>
@@ -109,11 +116,9 @@
         </div>
         <div class="editor-container">
           <div class="button-group">
-            <button class="convert-button" onclick="execute_literalToNewlines()"><i class="fa-sharp fa-solid fa-circle-chevron-left"></i> \n to Newlines</button>
-            <button class="convert-button" onclick="execute_unquoteStringValue()"><i class="fa-sharp fa-solid fa-circle-chevron-left"></i> Unquote</button>
+            <button class="convert-button" onclick="execute_copyOutputToInput()"><i class="fa-sharp fa-solid fa-circle-chevron-left"></i> Copy</button>
           </div>
           <div class="button-group">
-            <button id="pasteOutputStringButton" class="action-button"><i class="fas fa-paste"></i> Paste</button>
             <button id="copyOutputStringButton" class="action-button"><i class="fas fa-copy"></i> Copy</button>
           </div>
           <!-- <textarea id="stringOutput" placeholder="Output..." readonly></textarea> -->

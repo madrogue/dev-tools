@@ -409,40 +409,44 @@ function execute_convertJson5ToJson() {
   jsonInputEditor.setValue(jsonInput);
 }
 
-function execute_stripNewlines() {
-  const stringInput = stringInputEditor.getValue();
-  const stringOutput = stripNewlines(stringInput);
-  stringOutputEditor.setValue(stringOutput);
-}
-
-function execute_newlinesToLiteral() {
+function execute_applyStringManipulation() {
+  const functionSelect = document.getElementById('stringFunctionSelect');
+  const selectedFunction = functionSelect.value;
   const input = stringInputEditor.getValue();
-  const output = newlinesToLiteral(input);
+  let output = '';
+
+  switch(selectedFunction) {
+    case 'stripNewlines':
+      output = stripNewlines(input);
+      break;
+    case 'newlinesToLiteral':
+      output = newlinesToLiteral(input);
+      break;
+    case 'literalToNewlines':
+      output = literalToNewlines(input);
+      break;
+    case 'quoteString':
+      output = quoteString(input);
+      break;
+    case 'unquoteString':
+      output = unquoteString(input);
+      break;
+    case 'toggleQuotes':
+      output = toggleQuotes(input);
+      break;
+    case 'parseStringifiedJson':
+      output = parseStringifiedJson(input);
+      break;
+    default:
+      output = input;
+  }
+
   stringOutputEditor.setValue(output);
 }
 
-function execute_literalToNewlines() {
-  const input = stringOutputEditor.getValue();
-  const output = literalToNewlines(input);
+function execute_copyOutputToInput() {
+  const output = stringOutputEditor.getValue();
   stringInputEditor.setValue(output);
-}
-
-function execute_quoteStringValue() {
-  const unquotedValue = stringInputEditor.getValue();
-  const quotedValue = quoteString(unquotedValue);
-  stringOutputEditor.setValue(quotedValue);
-}
-
-function execute_unquoteStringValue() {
-  const quotedValue = stringOutputEditor.getValue();
-  const unquotedValue = unquoteString(quotedValue);
-  stringInputEditor.setValue(unquotedValue);
-}
-
-function execute_toggleQuotes() {
-  const input = stringInputEditor.getValue();
-  const output = toggleQuotes(input);
-  stringOutputEditor.setValue(output);
 }
 
 function execute_convertTimestampToDate() {
