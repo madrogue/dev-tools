@@ -75,18 +75,10 @@ After Phase 2 consolidation, verify copy/paste works in all tools.
 
 ## Phase 6 — Smart Paste & Format Detection
 
-This improves the **JSON ↔ JSON5** tab (and the new JSON Analyze/Transform tools) so pasting into either pane auto-detects the format and applies the right conversion.
-
-- [ ] **Detect format on paste**: When user clicks Paste (or Ctrl+V into a Monaco editor), run `detectFormat(text)` which tries:
-  1. `JSON.parse()` → it's strict JSON
-  2. `JSON5.parse()` without errors that `JSON.parse` would have caught → it's JSON5 (has unquoted keys, trailing commas, comments, etc.)
-  3. Falls through → unknown, just paste raw
-- [ ] **Auto-select tool**: After detection, update the tool dropdown to the most relevant option and optionally auto-apply.
-- [ ] **Direction buttons**: The existing left-arrow / right-arrow buttons already control direction. Enhance them:
-  - Left pane → right pane: apply selected tool, result goes to right
-  - Right pane → left pane: apply reverse operation, result goes to left
-  - The "←" and "→" chevron buttons already exist; wire them to use the detected format
-- [ ] **Show format badge**: Next to each editor, show a small badge (e.g. `JSON` or `JSON5` or `?`) that updates whenever editor content changes.
+- [x] **Detect format on paste**: `detectAndUpdateBadge()` tries `JSON.parse()` → `JSON5.parse()` → TEXT, updates badge live on every content change.
+- [x] **Auto-select tool on paste**: `autoDetectJsonToolAndSwitch()` — when pasting while on `jsonToJson5`/`json5ToJson`, detects the pasted format and switches to the appropriate conversion. `autoDetectKeyFormatAndSwitch()` does the same for key-transform tools.
+- [x] **Reverse direction button**: `execute_copyRightToLeft()` now applies the reverse conversion (JSON5→JSON or JSON→JSON5) when on a reversible JSON tool; falls back to plain copy for all other tools.
+- [x] **Format badges**: `<span id="leftFormatBadge">` / `<span id="rightFormatBadge">` added above each editor. Styled as color-coded pills (blue=JSON, amber=JSON5, grey=TEXT). Updated on every keystroke via `onDidChangeModelContent` and on initial load from localStorage.
 
 ---
 

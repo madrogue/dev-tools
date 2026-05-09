@@ -140,6 +140,27 @@ function onDOMContentLoaded() {
 
 }
 
+function detectAndUpdateBadge(badgeId, text) {
+  const badge = document.getElementById(badgeId);
+  if (!badge) return;
+  const t = (text || '').trim();
+  if (!t) { badge.textContent = ''; badge.className = 'format-badge'; return; }
+  try {
+    JSON.parse(t);
+    badge.textContent = 'JSON';
+    badge.className = 'format-badge json';
+  } catch(e) {
+    try {
+      JSON5.parse(t);
+      badge.textContent = 'JSON5';
+      badge.className = 'format-badge json5';
+    } catch(e5) {
+      badge.textContent = 'TEXT';
+      badge.className = 'format-badge text';
+    }
+  }
+}
+
 function initializeEditor(editorId, language, value) {
   const editor = monaco.editor.create(document.getElementById(editorId), {
     value: value,
@@ -149,10 +170,12 @@ function initializeEditor(editorId, language, value) {
   });
 
   editor.setValue(localStorage.getItem(editorId) || "");
+  const badgeId = editorId === 'leftEditor' ? 'leftFormatBadge' : 'rightFormatBadge';
+  detectAndUpdateBadge(badgeId, editor.getValue());
 
-  // Save editor value on change
   editor.onDidChangeModelContent(() => {
     localStorage.setItem(editorId, editor.getValue());
+    detectAndUpdateBadge(badgeId, editor.getValue());
   });
 
   return editor;
@@ -255,6 +278,7 @@ function pasteTimestamp() {
 document.getElementById('pasteLeftButton').addEventListener('click', function () {
   pasteToEditor(leftEditor, function() {
     autoDetectKeyFormatAndSwitch();
+    autoDetectJsonToolAndSwitch();
     execute_applyTool();
   });
 });
@@ -371,7 +395,16 @@ function execute_convertJson5ToJson() {
 }
 
 function execute_copyRightToLeft() {
-  leftEditor.setValue(rightEditor.getValue());
+  const fn = document.getElementById('toolFunctionSelect').value;
+  if (fn === 'jsonToJson5') {
+    const result = convertJson5ToJson(rightEditor.getValue());
+    if (result !== null) leftEditor.setValue(result);
+  } else if (fn === 'json5ToJson') {
+    const result = convertJsonToJson5(rightEditor.getValue());
+    if (result !== null) leftEditor.setValue(result);
+  } else {
+    leftEditor.setValue(rightEditor.getValue());
+  }
 }
 
 function getDepth(obj, depth) {
@@ -550,6 +583,25 @@ function autoDetectKeyFormatAndSwitch() {
     else if (fmt === 'v' || fmt === 'value') select.value = 'wrappedToFlat';
     execute_onToolChange();
   } catch (e) {}
+}
+
+function autoDetectJsonToolAndSwitch() {
+  const jsonTools = ['jsonToJson5', 'json5ToJson'];
+  const select = document.getElementById('toolFunctionSelect');
+  if (jsonTools.indexOf(select.value) === -1) return;
+  const text = leftEditor.getValue().trim();
+  if (!text) return;
+  try {
+    JSON.parse(text);
+    select.value = 'jsonToJson5';
+    execute_onToolChange();
+  } catch(e) {
+    try {
+      JSON5.parse(text);
+      select.value = 'json5ToJson';
+      execute_onToolChange();
+    } catch(e5) {}
+  }
 }
 
 function execute_applyStringManipulation() {

@@ -298,3 +298,40 @@ table>tr>td:first-child:not(.ignored) {
   margin-right: 10px;
   font-weight: normal;
 }
+
+/****************************************************
+ * Format badge styles
+ ****************************************************/
+.editor-status {
+  display: flex;
+  align-items: center;
+  min-height: 18px;
+  padding: 2px 0;
+}
+
+.format-badge {
+  font-size: 0.68rem;
+  padding: 1px 6px;
+  border-radius: 3px;
+  font-weight: 600;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+}
+
+.format-badge.json {
+  background: #0e2a45;
+  color: #5b9bd5;
+  border: 1px solid #1e4a70;
+}
+
+.format-badge.json5 {
+  background: #3a2a0a;
+  color: #d5a05b;
+  border: 1px solid #70480a;
+}
+
+.format-badge.text {
+  background: #2a2a2a;
+  color: #888;
+  border: 1px solid #444;
+}
