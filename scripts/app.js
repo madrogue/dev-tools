@@ -138,19 +138,6 @@ function onDOMContentLoaded() {
     });
   });
 
-  // // Restore editor values
-  // if (jsonInputEditor) {
-  //   jsonInputEditor.setValue(localStorage.getItem('jsonInput') || '');
-  // }
-  // if (json5InputEditor) {
-  //   json5InputEditor.setValue(localStorage.getItem('json5Input') || '');
-  // }
-  // if (stringInputEditor) {
-  //   stringInputEditor.setValue(localStorage.getItem('stringInput') || '');
-  // }
-  // if (stringOutputEditor) {
-  //   stringOutputEditor.setValue(localStorage.getItem('stringOutput') || '');
-  // }
 }
 
 function initializeEditor(editorId, language, value) {
@@ -266,7 +253,10 @@ function pasteTimestamp() {
 
 //#region Editor copy/paste buttons
 document.getElementById('pasteLeftButton').addEventListener('click', function () {
-  pasteToEditor(leftEditor, execute_applyTool);
+  pasteToEditor(leftEditor, function() {
+    autoDetectKeyFormatAndSwitch();
+    execute_applyTool();
+  });
 });
 document.getElementById('copyLeftButton').addEventListener('click', function () {
   copyFromEditor(leftEditor);
@@ -276,20 +266,6 @@ document.getElementById('pasteRightButton').addEventListener('click', function (
 });
 document.getElementById('copyRightButton').addEventListener('click', function () {
   copyFromEditor(rightEditor);
-});
-//#endregion
-
-//#region String copy/paste buttons
-document.getElementById('copyInputStringButton').addEventListener('click', function () {
-  copyFromEditor(stringInputEditor);
-});
-
-document.getElementById('pasteInputStringButton').addEventListener('click', function () {
-  pasteToEditor(stringInputEditor);
-});
-
-document.getElementById('copyOutputStringButton').addEventListener('click', function () {
-  copyFromEditor(stringOutputEditor);
 });
 //#endregion
 
@@ -330,6 +306,10 @@ const toolLanguageModes = {
   quoteString:              ['plaintext', 'plaintext'],
   unquoteString:            ['plaintext', 'plaintext'],
   toggleQuotes:             ['plaintext', 'plaintext'],
+  analyzeJson:              ['json',      'plaintext'],
+  flatToWrapped:            ['json',      'json'],
+  wrappedToFlat:            ['json',      'json'],
+  rewrap:                   ['json',      'json'],
 };
 
 function execute_onToolChange() {
@@ -349,6 +329,11 @@ function execute_applyTool() {
     case 'jsonToJson5':            execute_convertJsonToJson5(); break;
     case 'json5ToJson':            execute_convertJson5ToJson(); break;
     case 'parseGraylog':           execute_parseGraylogMessage(); break;
+    case 'analyzeJson':            execute_analyzeJson(); break;
+    // Key Transform group
+    case 'flatToWrapped':          execute_keyTransform(); break;
+    case 'wrappedToFlat':          execute_keyTransform(); break;
+    case 'rewrap':                 execute_keyTransform(); break;
     // Text group
     case 'stripNewlines':          execute_applyStringManipulation(); break;
     case 'newlinesToLiteral':      execute_applyStringManipulation(); break;
@@ -387,6 +372,184 @@ function execute_convertJson5ToJson() {
 
 function execute_copyRightToLeft() {
   leftEditor.setValue(rightEditor.getValue());
+}
+
+function getDepth(obj, depth) {
+  depth = depth || 0;
+  if (typeof obj !== 'object' || obj === null) return depth;
+  const children = Array.isArray(obj) ? obj : Object.values(obj);
+  if (children.length === 0) return depth;
+  return Math.max.apply(null, children.map(function(v) { return getDepth(v, depth + 1); }));
+}
+
+function execute_analyzeJson() {
+  const input = leftEditor.getValue().trim();
+  if (!input) { showValidationResult('No input.', 'error'); return; }
+
+  let parsed, detectedFormat;
+  try {
+    parsed = JSON.parse(input);
+    detectedFormat = 'JSON';
+  } catch (e) {
+    try {
+      parsed = JSON5.parse(input);
+      detectedFormat = 'JSON5';
+    } catch (e5) {
+      showValidationResult('Parse error: ' + e5.message, 'error');
+      return;
+    }
+  }
+
+  const lines = [];
+  const byteSize = new Blob([input]).size;
+  const topType = Array.isArray(parsed) ? 'array' : (parsed === null ? 'null' : typeof parsed);
+
+  lines.push('Format:         ' + detectedFormat);
+  lines.push('Size:           ~' + byteSize.toLocaleString() + ' bytes');
+  lines.push('Top-level type: ' + topType);
+
+  if (topType === 'array') {
+    lines.push('Item count:     ' + parsed.length);
+    if (parsed.length === 0) {
+      lines.push('(empty array)');
+    } else {
+      const typeSet = {};
+      parsed.forEach(function(item) {
+        const t = Array.isArray(item) ? 'array' : (item === null ? 'null' : typeof item);
+        typeSet[t] = (typeSet[t] || 0) + 1;
+      });
+      const typeDesc = Object.entries(typeSet).map(function(e) {
+        return parsed.length === e[1] ? e[0] + ' (all)' : e[0] + ' ×' + e[1];
+      }).join(', ');
+      lines.push('Item types:     ' + typeDesc);
+
+      const objs = parsed.filter(function(item) {
+        return typeof item === 'object' && item !== null && !Array.isArray(item);
+      });
+
+      if (objs.length > 0) {
+        const keySets = objs.map(function(item) { return Object.keys(item); });
+        const union = Array.from(new Set([].concat.apply([], keySets)));
+        const intersection = union.filter(function(k) {
+          return keySets.every(function(ks) { return ks.indexOf(k) !== -1; });
+        });
+
+        lines.push('');
+        lines.push('Keys (union, ' + union.length + ' total):');
+        lines.push('  ' + union.join(', '));
+        lines.push('Keys in every item (' + intersection.length + '):');
+        lines.push('  ' + (intersection.length ? intersection.join(', ') : '(none)'));
+
+        const optional = union.filter(function(k) { return intersection.indexOf(k) === -1; });
+        if (optional.length > 0) {
+          lines.push('Optional keys:');
+          optional.forEach(function(k) {
+            const count = objs.filter(function(item) { return k in item; }).length;
+            lines.push('  ' + k + ' — present in ' + count + '/' + objs.length + ' items');
+          });
+        }
+
+        const nullCounts = {};
+        objs.forEach(function(item) {
+          Object.entries(item).forEach(function(e) {
+            if (e[1] === null || e[1] === undefined) {
+              nullCounts[e[0]] = (nullCounts[e[0]] || 0) + 1;
+            }
+          });
+        });
+        if (Object.keys(nullCounts).length > 0) {
+          lines.push('Keys with null values:');
+          Object.entries(nullCounts).forEach(function(e) {
+            lines.push('  ' + e[0] + ' — null in ' + e[1] + '/' + objs.length + ' items');
+          });
+        }
+
+        const depths = objs.map(function(item) { return getDepth(item); });
+        const minD = Math.min.apply(null, depths);
+        const maxD = Math.max.apply(null, depths);
+        const avgD = (depths.reduce(function(a, b) { return a + b; }, 0) / depths.length).toFixed(1);
+        lines.push('');
+        lines.push('Depth: min=' + minD + ', max=' + maxD + ', avg=' + avgD);
+
+        ['__key', '$id'].forEach(function(field) {
+          const vals = objs.filter(function(item) { return field in item; }).map(function(item) { return item[field]; });
+          if (vals.length === 0) return;
+          const seen = {};
+          vals.forEach(function(v) { seen[v] = (seen[v] || 0) + 1; });
+          const dups = Object.entries(seen).filter(function(e) { return e[1] > 1; });
+          lines.push('');
+          if (dups.length > 0) {
+            lines.push('Duplicate ' + field + ' values (' + dups.length + '):');
+            dups.forEach(function(e) { lines.push('  "' + e[0] + '" appears ' + e[1] + ' times'); });
+          } else {
+            lines.push(field + ': ' + vals.length + ' unique values (no duplicates)');
+          }
+        });
+      }
+    }
+  } else if (topType === 'object') {
+    const keys = Object.keys(parsed);
+    lines.push('Key count:      ' + keys.length);
+    lines.push('');
+    lines.push('Value types per key:');
+    keys.forEach(function(k) {
+      const v = parsed[k];
+      const t = Array.isArray(v) ? 'array[' + v.length + ']' : (v === null ? 'null' : typeof v);
+      lines.push('  ' + k + ': ' + t);
+    });
+    lines.push('');
+    lines.push('Depth: ' + getDepth(parsed));
+  } else {
+    lines.push('Value: ' + JSON.stringify(parsed));
+  }
+
+  rightEditor.setValue(lines.join('\n'));
+  showValidationResult('Analysis complete!', 'success');
+}
+
+function execute_keyTransform() {
+  const fn = document.getElementById('toolFunctionSelect').value;
+  try {
+    const input = leftEditor.getValue().trim();
+    if (!input) { showValidationResult('No input.', 'error'); return; }
+    let arr;
+    try { arr = JSON.parse(input); } catch(e) { arr = JSON5.parse(input); }
+    if (!Array.isArray(arr)) {
+      showValidationResult('Input must be a JSON array.', 'error');
+      return;
+    }
+    let result;
+    if (fn === 'flatToWrapped') {
+      result = flatToWrapped(arr, 'v');
+    } else if (fn === 'wrappedToFlat') {
+      result = wrappedToFlat(arr);
+    } else if (fn === 'rewrap') {
+      const fmt = detectKeyFormat(arr);
+      if (fmt === 'v') result = rewrapKeys(arr, 'v', 'value');
+      else if (fmt === 'value') result = rewrapKeys(arr, 'value', 'v');
+      else { showValidationResult('Cannot detect wrap key (expected "v" or "value").', 'error'); return; }
+    }
+    rightEditor.setValue(JSON.stringify(result, null, 2));
+    showValidationResult('Transform complete!', 'success');
+  } catch (e) {
+    showValidationResult('Error: ' + e.message, 'error');
+  }
+}
+
+function autoDetectKeyFormatAndSwitch() {
+  const keyTransformTools = ['flatToWrapped', 'wrappedToFlat', 'rewrap'];
+  const select = document.getElementById('toolFunctionSelect');
+  if (keyTransformTools.indexOf(select.value) === -1) return;
+  try {
+    const text = leftEditor.getValue().trim();
+    let arr;
+    try { arr = JSON.parse(text); } catch(e) { arr = JSON5.parse(text); }
+    if (!Array.isArray(arr)) return;
+    const fmt = detectKeyFormat(arr);
+    if (fmt === 'flat') select.value = 'flatToWrapped';
+    else if (fmt === 'v' || fmt === 'value') select.value = 'wrappedToFlat';
+    execute_onToolChange();
+  } catch (e) {}
 }
 
 function execute_applyStringManipulation() {

@@ -38,6 +38,12 @@
                 <option value="jsonToJson5">JSON → JSON5</option>
                 <option value="json5ToJson">JSON5 → JSON</option>
                 <option value="parseGraylog">Parse Graylog</option>
+                <option value="analyzeJson">Analyze JSON</option>
+              </optgroup>
+              <optgroup label="Key Transform">
+                <option value="flatToWrapped">Flat → Wrapped (v)</option>
+                <option value="wrappedToFlat">Wrapped → Flat</option>
+                <option value="rewrap">Rewrap (v ↔ value)</option>
               </optgroup>
               <optgroup label="Text">
                 <option value="stripNewlines">Strip Newlines</option>
@@ -304,6 +310,7 @@
 
     </div>
 
+    <script src="scripts/keyTransform.js"></script>
     <script src="scripts/jsonToJson5.js"></script>
     <script src="scripts/json5ToJson.js"></script>
     <script src="scripts/timestampToDate.js"></script>

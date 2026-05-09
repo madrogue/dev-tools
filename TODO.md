@@ -53,63 +53,23 @@ After Phase 2 consolidation, verify copy/paste works in all tools.
 - [x] **Utils tab — Timestamp**: Paste from clipboard → timestamp input, "Now" button, Copy output. ✅
 - [x] **Utils tab — UUID/Token**: Inline Copy buttons on each field. ✅
 - [x] **Utils tab — Units**: Plain `<input>` fields, no clipboard buttons needed. ✅
-- [ ] **After Phases 4–5 (new tools)**: Verify every new tool pane follows the pattern above.
+- [x] **After Phases 4–5 (new tools)**: All new tools (Analyze JSON, Flat→Wrapped, Wrapped→Flat, Rewrap) use the shared left/right pane with Paste Left / Copy Right — same pattern as all other tools.
 
 ---
 
 ## Phase 4 — New Tool: JSON/JSON5 Analyzer
 
-Add **"Analyze"** to the **JSON** tab's left-pane tool dropdown. It accepts JSON or JSON5 input and outputs a structured stats report to the right pane.
-
-Stats to report (all as formatted text/JSON):
-- Detected format: JSON or JSON5
-- Top-level type: array / object / primitive
-- If array:
-  - Item count
-  - Item types (all objects, mixed, etc.)
-  - Keys present across all items (union of all keys)
-  - Keys present in every item (intersection)
-  - Keys with null/undefined values and how often
-  - Min/max/avg depth of nested objects
-  - Any duplicate `__key` or `$id` values (with count)
-- If object:
-  - Key count
-  - Value types per key
-  - Nested depth
-- Estimated JSON size (bytes)
-
-Output is plain text or a structured JSON report in the right editor.
-
-Implementation notes:
-- Add `analyzeJson` to the tool select dropdown in the JSON tab
-- Add `execute_analyzeJson()` to `app.js`
-- The function should try `JSON5.parse()` first (handles both JSON and JSON5)
+- [x] Add **"Analyze JSON"** to the JSON optgroup in the tools dropdown (`analyzeJson`)
+- [x] `execute_analyzeJson()` in `app.js`: detects format (JSON vs JSON5), reports top-level type, item count, key union/intersection, optional keys, null frequencies, min/max/avg depth, duplicate `__key`/`$id` detection, byte size. Output is plaintext report in right pane.
 
 ---
 
 ## Phase 5 — New Tool: Key Format Transform
 
-Add **"Flat → Wrapped"**, **"Wrapped → Flat"**, and **"Rewrap (v ↔ value)"** to the **JSON** tab's left-pane tool dropdown for converting between these three array-of-objects formats:
-
-**Format A** (flat): `[{ __key: "k1", ts: 1234, fieldA: 1, fieldB: "x" }]`
-
-**Format B** (wrapped with `v`): `[{ $id: "k1", $ts: 1234, v: { fieldA: 1, fieldB: "x" } }]`
-
-**Format C** (wrapped with `value`): `[{ $id: "k1", $ts: 1234, value: { fieldA: 1, fieldB: "x" } }]`
-
-Rules:
-- `__key` ↔ `$id`
-- `ts` ↔ `$ts`
-- All other fields ↔ content of `v` or `value`
-- Input can be JSON or JSON5; output is JSON5 by default (toggle to JSON)
-- Both directions: A→B, A→C, B→A, C→A, B→C, C→B
-- Use the two-editor side-by-side layout with direction arrows
-
-Implementation:
-- Add a new file `scripts/keyTransform.js` with pure functions: `flatToWrapped(arr, wrapKey)`, `wrappedToFlat(arr)`, `detectKeyFormat(arr)` (returns `'flat'|'v'|'value'|'unknown'`)
-- Add the three functions to the JSON tab dropdown (no new tab needed)
-- Auto-detect format on paste and pre-select the appropriate conversion
-- Input accepts JSON or JSON5
+- [x] New file `scripts/keyTransform.js` with pure functions: `detectKeyFormat(arr)`, `flatToWrapped(arr, wrapKey)`, `wrappedToFlat(arr)`, `rewrapKeys(arr, fromKey, toKey)`
+- [x] Three options added to a new "Key Transform" optgroup: "Flat → Wrapped (v)", "Wrapped → Flat", "Rewrap (v ↔ value)"
+- [x] `execute_keyTransform()` in `app.js`; "Rewrap" auto-detects current wrap key and toggles; "Wrapped → Flat" handles both v and value
+- [x] Auto-detect on paste: `autoDetectKeyFormatAndSwitch()` — when pasting while a key-transform tool is active, detects flat/v/value and pre-selects the appropriate conversion
 
 ---
 
