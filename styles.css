@@ -1,42 +1,77 @@
-/* Utils tab styles */
-#utils .side-by-side {
-  flex: 0 0 auto;
+/****************************************************
+ * Design tokens
+ ****************************************************/
+:root {
+  /* Backgrounds — 4 elevation levels */
+  --bg:    #111111;   /* page base */
+  --bg-1:  #1a1a1a;   /* panels, tab content */
+  --bg-2:  #222222;   /* inputs, surfaces */
+  --bg-3:  #2e2e2e;   /* hover rows, table headers */
+
+  /* Borders — 2 levels */
+  --border:   #2a2a2a;   /* structural, subtle */
+  --border-i: #3d3d3d;   /* interactive / focus */
+
+  /* Text — 3 levels */
+  --text:   #d4d4d4;   /* primary */
+  --text-2: #888888;   /* secondary / muted */
+  --text-3: #505050;   /* very muted */
+
+  /* Accent */
+  --accent:       #3b82f6;
+  --accent-hover: #2563eb;
+  --accent-dim:   #172554;   /* dark accent bg for buttons */
+
+  /* Feedback — dark-native */
+  --ok-bg:     #0a1f14;
+  --ok-text:   #4ade80;
+  --ok-border: #14532d;
+  --err-bg:    #200d0d;
+  --err-text:  #f87171;
+  --err-border: #7f1d1d;
 }
 
 /****************************************************
  * Utils sub-tabs
  ****************************************************/
+#utils .side-by-side {
+  flex: 0 0 auto;
+}
+
 .utils-tabs {
   display: flex;
   gap: 4px;
-  border-bottom: 1px solid #333;
+  border-bottom: 1px solid var(--border);
   flex-shrink: 0;
 }
 
 .utils-tab-button {
   padding: 6px 16px;
   border-radius: 4px 4px 0 0;
-  background: #252525;
-  border: 1px solid #333;
+  background: var(--bg-2);
+  border: 1px solid var(--border);
+  border-top: 2px solid transparent;
   border-bottom: none;
-  color: #777;
+  color: var(--text-2);
   cursor: pointer;
   font-size: 0.75rem;
   text-transform: uppercase;
   letter-spacing: 0.1em;
   flex: 0 1 auto;
   margin-bottom: -1px;
+  transition: background 120ms ease, color 120ms ease;
 }
 
 .utils-tab-button:hover {
-  background: #333;
-  color: #bdbdbd;
+  background: var(--bg-3);
+  color: var(--text);
 }
 
 .utils-tab-button.active {
-  background: #121212;
-  color: #bdbdbd;
-  border-bottom: 1px solid #121212;
+  background: var(--bg);
+  color: var(--text);
+  border-top: 2px solid var(--accent);
+  border-bottom: 1px solid var(--bg);
 }
 
 .utils-panel {
@@ -45,55 +80,63 @@
 
 .utils-panel.active {
   display: block;
-  padding-top: 14px;
+  padding-top: 16px;
 }
 
 .utils-section-title {
-  margin: 0 0 0.5rem 0;
-  font-size: 0.8rem;
+  margin: 0 0 8px 0;
+  font-size: 0.75rem;
   text-transform: uppercase;
-  letter-spacing: 0.12em;
-  color: #777;
-  font-weight: 500;
+  letter-spacing: 0.14em;
+  color: var(--text-2);
+  font-weight: 600;
 }
 
 .utils-divider {
   border: none;
-  border-top: 1px solid #333;
-  margin: 1.5rem 0;
+  border-top: 1px solid var(--border);
+  margin: 24px 0;
   flex-shrink: 0;
 }
 
+/****************************************************
+ * Validation feedback
+ ****************************************************/
 .validation-result {
-  margin-top: 0.5rem;
-  padding: 0.5em 1em;
+  margin-top: 8px;
+  padding: 6px 12px;
   border-radius: 4px;
-  font-weight: bold;
+  font-weight: 600;
+  font-size: 0.85rem;
 }
 
 .validation-result.success {
-  background: #e0ffe0;
-  color: #207520;
-  border: 1px solid #207520;
+  background: var(--ok-bg);
+  color: var(--ok-text);
+  border: 1px solid var(--ok-border);
 }
 
 .validation-result.error {
-  background: #ffe0e0;
-  color: #a00000;
-  border: 1px solid #a00000;
+  background: var(--err-bg);
+  color: var(--err-text);
+  border: 1px solid var(--err-border);
 }
 
+/****************************************************
+ * Base
+ ****************************************************/
 html,
 body {
-  font-family: 'Fira Code', monospace;
-  /* font-family: Arial, sans-serif; */
+  font-family: 'Inter', system-ui, sans-serif;
   margin: 0;
   padding: 0;
   height: 100vh;
   display: flex;
   flex-direction: column;
-  background-color: #121212;
-  color: #bdbdbd;
+  background-color: var(--bg);
+  color: var(--text);
+  font-size: 14px;
+  line-height: 1.5;
 }
 
 .container {
@@ -104,49 +147,61 @@ body {
 
 h1 {
   margin: 0;
-  padding: 10px;
-  background-color: #1e1e1e;
-  text-align: center;
-  color: #bdbdbd;
+  padding: 6px 16px;
+  background-color: var(--bg-1);
+  text-align: left;
+  color: var(--text-3);
+  font-size: 0.65rem;
+  font-weight: 600;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
 }
 
 /****************************************************
- * Tab styles
+ * Main tabs
  ****************************************************/
 .tabs {
   display: flex;
-  justify-content: center;
-  padding-bottom: 10px;
+  justify-content: flex-start;
+  padding: 10px 12px 0;
   width: 100%;
-  gap: 10px;
+  gap: 6px;
   overflow-x: auto;
   flex-wrap: nowrap;
+  box-sizing: border-box;
+  flex-shrink: 0;
 }
 
 .tab-content {
   flex: 1;
   display: none;
-  padding: 10px;
+  padding: 12px;
   overflow: auto;
-  border: 1px solid #333;
-  /* border-radius: 0 0 5px 5px; */
-  border-radius: 5px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  margin: 0 12px 12px;
+  min-height: 0;
 }
 
 .tab-content.active {
   display: flex;
   flex-direction: column;
-  height: 100%;
+  min-height: 0;
 }
 
 .container-highlight {
-  background-color: #1e1e1e;
+  background-color: var(--bg-1);
 }
 
+/****************************************************
+ * Layout
+ ****************************************************/
 .side-by-side {
   flex: 1;
   display: flex;
-  gap: 10px;
+  gap: 12px;
 }
 
 .editor-container {
@@ -157,81 +212,113 @@ h1 {
 
 .code-editor {
   flex: 1;
-  margin: 10px 0;
+  margin: 8px 0;
 }
 
+/****************************************************
+ * Base element resets
+ ****************************************************/
 textarea {
   flex: 1;
   padding: 10px;
-  border: 1px solid #333;
+  border: 1px solid var(--border);
   border-radius: 5px;
   resize: none;
-  margin-top: 10px;
-  background-color: #2e2e2e;
-  color: #bdbdbd;
+  margin-top: 8px;
+  background-color: var(--bg-2);
+  color: var(--text);
+  font-family: 'Fira Code', monospace;
+  font-size: 0.85rem;
+}
+
+textarea:focus {
+  outline: none;
+  border-color: var(--border-i);
 }
 
 button {
-  flex: 1;
-  /* margin-top: 10px; */
-  padding: 10px;
+  flex: 0 1 auto;
+  padding: 7px 14px;
   border-radius: 5px;
-  background-color: #333;
-  border: 1px solid #333;
+  background-color: var(--bg-2);
+  border: 1px solid var(--border);
   cursor: pointer;
-  text-transform: uppercase;
   text-align: center;
-  color: #bdbdbd;
+  color: var(--text-2);
+  font-family: 'Inter', system-ui, sans-serif;
+  font-size: 0.78rem;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  white-space: nowrap;
+  transition: background 120ms ease, border-color 120ms ease, color 120ms ease;
 }
 
 button:hover {
-  background-color: #555;
+  background-color: var(--bg-3);
+  border-color: var(--border-i);
+  color: var(--text);
 }
 
 .button-group {
   display: flex;
-  gap: 10px;
-  /* Make the button group take the full width of its parent */
+  gap: 8px;
   width: 100%;
-  /* Distribute buttons evenly within the group */
-  /* justify-content: space-between; */
   justify-content: center;
 }
 
 /****************************************************
- * Button styles
+ * Button variants
  ****************************************************/
 .tab-button {
-  /* Make buttons take equal width */
   flex: 1;
-  border: 1px solid #333;
-  background-color: #333;
+  min-width: 80px;
+  background-color: var(--bg-2);
+  border: 1px solid var(--border);
+  border-top: 2px solid transparent;
+  color: var(--text-2);
+  font-size: 0.8rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.tab-button:hover {
+  background-color: var(--bg-3);
+  color: var(--text);
 }
 
 .tab-button.active {
-  background-color: #444;
+  background-color: var(--bg-1);
+  border-color: var(--border-i);
+  border-top: 2px solid var(--accent);
+  color: var(--text);
 }
 
 .action-button {
-  /* Make buttons take equal width */
-  flex: 1;
-  background-color: #444;
-  border: 1px solid #333;
+  flex: 0 1 auto;
+  background-color: var(--bg-2);
+  border: 1px solid var(--border);
+  color: var(--text-2);
 }
 
 .action-button:hover {
-  background-color: #555;
+  background-color: var(--bg-3);
+  color: var(--text);
+  border-color: var(--border-i);
 }
 
 .convert-button {
-  /* Rich blue color */
-  background-color: #1e3a8a;
-  border: 1px solid #333;
+  background-color: var(--accent);
+  border: 1px solid var(--accent);
+  color: #ffffff;
+  font-weight: 600;
+  letter-spacing: 0.03em;
 }
 
 .convert-button:hover {
-  /* Slightly lighter blue for hover effect */
-  background-color: #1e40af;
+  background-color: var(--accent-hover);
+  border-color: var(--accent-hover);
+  color: #ffffff;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
 }
 
 /****************************************************
@@ -240,37 +327,47 @@ button:hover {
 table {
   width: 100%;
   margin: 1em 0;
-  border: 1px solid #333;
-  border-radius: 5px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
   border-collapse: collapse;
   border-spacing: 0;
 }
 
 table th,
 table td {
-  padding: 10px;
-  border: 1px solid #333;
-  /* border-radius: 5px; */
+  padding: 9px 12px;
+  border: 1px solid var(--border);
   text-align: left;
 }
 
 table th {
-  background-color: #444;
-  font-weight: bold;
+  background-color: var(--bg-2);
+  color: var(--text-2);
+  font-weight: 600;
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
 }
 
-table tr:hover {
-  background-color: #555;
+table tr:hover td {
+  background-color: var(--bg-2);
 }
 
-table>tbody>tr>td:first-child:not(.ignored),
-table>tfoot>tr>td:first-child:not(.ignored),
-table>tr>td:first-child:not(.ignored) {
-  background: #444;
+table > tbody > tr > td:first-child:not(.ignored),
+table > tfoot > tr > td:first-child:not(.ignored),
+table > tr > td:first-child:not(.ignored) {
+  background: var(--bg-2);
+  color: var(--text-2);
 }
 
 .click-to-copy {
   cursor: pointer;
+}
+
+.click-to-copy:active {
+  background-color: var(--accent-dim) !important;
+  color: var(--accent) !important;
+  transition: none;
 }
 
 /****************************************************
@@ -279,7 +376,7 @@ table>tr>td:first-child:not(.ignored) {
 .equal-width {
   display: flex;
   flex-wrap: wrap;
-  gap: 5px;
+  gap: 8px;
 }
 
 .equal-width div {
@@ -288,35 +385,56 @@ table>tr>td:first-child:not(.ignored) {
 
 .equal-width label {
   display: block;
-  margin-bottom: 5px;
-  font-weight: bold;
+  margin-bottom: 4px;
+  font-weight: 600;
+  font-size: 0.8rem;
+  color: var(--text-2);
   overflow: hidden;
   white-space: nowrap;
   text-overflow: ellipsis;
 }
 
 .field {
-  margin-top: 10px;
+  margin-top: 8px;
 }
 
 .field input,
 .field select {
   width: 100%;
-  padding: 10px;
-  border: 1px solid #333;
+  padding: 8px 10px;
+  border: 1px solid var(--border);
   border-radius: 5px;
   box-sizing: border-box;
+  background-color: var(--bg-2);
+  color: var(--text);
+  font-family: inherit;
+  transition: border-color 120ms ease;
+}
+
+.field input:focus,
+.field select:focus {
+  outline: none;
+  border-color: var(--border-i);
+}
+
+.field label {
+  display: block;
+  margin-bottom: 4px;
+  font-size: 0.8rem;
+  color: var(--text-2);
 }
 
 .field-buttons {
   display: flex;
   flex-direction: column;
-  margin-top: 10px;
+  margin-top: 8px;
 }
 
 .field-buttons label {
-  margin-bottom: 5px;
+  margin-bottom: 4px;
   text-align: center;
+  font-size: 0.75rem;
+  color: var(--text-2);
 }
 
 .field-buttons .button-container {
@@ -325,12 +443,11 @@ table>tr>td:first-child:not(.ignored) {
   gap: 5px;
 }
 
-/* Add to styles.css */
 .token-generator .field {
   display: flex;
   align-items: center;
   gap: 10px;
-  margin-top: 10px;
+  margin-top: 8px;
   flex-wrap: wrap;
 }
 
@@ -340,8 +457,102 @@ table>tr>td:first-child:not(.ignored) {
 }
 
 .token-generator label {
-  margin-right: 10px;
+  margin-right: 8px;
   font-weight: normal;
+  color: var(--text-2);
+  font-size: 0.85rem;
+}
+
+/****************************************************
+ * Utils panel max-width
+ ****************************************************/
+#utils {
+  max-width: 960px;
+}
+
+.utils-panel.active {
+  max-width: 100%;
+}
+
+/****************************************************
+ * Tool extra controls (Regex, JSONPath) — animated show/hide
+ ****************************************************/
+#regexControls,
+#jsonPathControls {
+  overflow: hidden;
+  max-height: 0;
+  opacity: 0;
+  transition: max-height 150ms ease, opacity 150ms ease;
+}
+
+#regexControls.visible,
+#jsonPathControls.visible {
+  max-height: 60px;
+  opacity: 1;
+}
+
+/****************************************************
+ * Click-to-copy affordance
+ ****************************************************/
+.click-to-copy {
+  position: relative;
+}
+
+.click-to-copy::after {
+  content: '⎘';
+  position: absolute;
+  right: 8px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 0.7rem;
+  color: var(--text-3);
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 120ms ease;
+}
+
+.click-to-copy:hover::after {
+  opacity: 1;
+}
+
+/****************************************************
+ * Misc widget styles
+ ****************************************************/
+
+/* Inputs used inside button-group rows (regex, jsonpath, cron) */
+.control-input {
+  padding: 8px 10px;
+  background: var(--bg-2);
+  color: var(--text);
+  border: 1px solid var(--border);
+  border-radius: 5px;
+  font-family: 'Fira Code', monospace;
+  font-size: 0.8rem;
+  transition: border-color 120ms ease;
+}
+
+.control-input:focus {
+  outline: none;
+  border-color: var(--border-i);
+}
+
+.color-swatch {
+  width: 100%;
+  height: 32px;
+  border-radius: 5px;
+  margin-top: 8px;
+  border: 1px solid var(--border);
+  background: var(--bg-1);
+  transition: background 150ms ease;
+}
+
+.cron-description {
+  margin-top: 8px;
+  padding: 6px 0;
+  color: var(--text-2);
+  font-style: italic;
+  font-size: 0.9rem;
+  min-height: 1.4em;
 }
 
 /****************************************************
@@ -355,11 +566,11 @@ table>tr>td:first-child:not(.ignored) {
 }
 
 .format-badge {
-  font-size: 0.68rem;
+  font-size: 0.65rem;
   padding: 1px 6px;
   border-radius: 3px;
-  font-weight: 600;
-  letter-spacing: 0.07em;
+  font-weight: 700;
+  letter-spacing: 0.1em;
   text-transform: uppercase;
 }
 
@@ -376,50 +587,59 @@ table>tr>td:first-child:not(.ignored) {
 }
 
 .format-badge.text {
-  background: #2a2a2a;
-  color: #888;
-  border: 1px solid #444;
+  background: var(--bg-2);
+  color: var(--text-2);
+  border: 1px solid var(--border-i);
 }
 
 /****************************************************
  * Markdown Preview panel
  ****************************************************/
 #rightPreviewPanel {
-  background: #1e1e1e;
-  color: #bdbdbd;
+  background: var(--bg-1);
+  color: var(--text);
 }
+
 #rightPreviewPanel h1, #rightPreviewPanel h2, #rightPreviewPanel h3,
 #rightPreviewPanel h4, #rightPreviewPanel h5, #rightPreviewPanel h6 {
-  color: #e0e0e0;
-  border-bottom: 1px solid #333;
+  color: #e8e8e8;
+  border-bottom: 1px solid var(--border);
   padding-bottom: 0.3em;
   margin-top: 1em;
 }
-#rightPreviewPanel a { color: #5b9bd5; }
+
+#rightPreviewPanel a { color: var(--accent); }
+
 #rightPreviewPanel code {
-  background: #2a2a2a;
+  background: var(--bg-2);
   color: #ce9178;
-  padding: 2px 4px;
+  padding: 2px 5px;
   border-radius: 3px;
   font-family: 'Fira Code', monospace;
   font-size: 0.9em;
 }
+
 #rightPreviewPanel pre {
-  background: #2a2a2a;
+  background: var(--bg-2);
   padding: 12px;
   border-radius: 5px;
   overflow-x: auto;
 }
-#rightPreviewPanel pre code { background: none; padding: 0; color: #bdbdbd; }
+
+#rightPreviewPanel pre code { background: none; padding: 0; color: var(--text); }
+
 #rightPreviewPanel blockquote {
-  border-left: 4px solid #444;
+  border-left: 3px solid var(--border-i);
   margin: 0;
   padding-left: 12px;
-  color: #888;
+  color: var(--text-2);
 }
+
 #rightPreviewPanel table { border-collapse: collapse; margin: 1em 0; }
+
 #rightPreviewPanel table th, #rightPreviewPanel table td {
-  border: 1px solid #333;
+  border: 1px solid var(--border);
   padding: 6px 10px;
 }
-#rightPreviewPanel table th { background: #333; color: #e0e0e0; }
+
+#rightPreviewPanel table th { background: var(--bg-2); color: #e8e8e8; }

@@ -360,8 +360,8 @@ function execute_onToolChange() {
   monaco.editor.setModelLanguage(rightEditor.getModel(), rightLang);
   document.getElementById('validationResult').textContent = '';
   document.getElementById('validationResult').className = 'validation-result';
-  document.getElementById('regexControls').style.display = tool === 'regexTest' ? '' : 'none';
-  document.getElementById('jsonPathControls').style.display = tool === 'jsonPathExplorer' ? '' : 'none';
+  document.getElementById('regexControls').classList.toggle('visible', tool === 'regexTest');
+  document.getElementById('jsonPathControls').classList.toggle('visible', tool === 'jsonPathExplorer');
   const isMarkdown = tool === 'markdownPreview';
   document.getElementById('rightEditor').style.display = isMarkdown ? 'none' : '';
   document.getElementById('rightPreviewPanel').style.display = isMarkdown ? '' : 'none';
@@ -2084,7 +2084,7 @@ function parseCron() {
     cur.setMinutes(cur.getMinutes() + 1);
   }
 
-  if (!results.length) { timesEl.innerHTML = '<p style="color:#888">No fire times found in the next 4 years.</p>'; return; }
+  if (!results.length) { timesEl.innerHTML = '<p class="cron-description">No fire times found in the next 4 years.</p>'; return; }
 
   const rows = results.map((d, idx) => {
     const fmt = window.moment ? moment(d).tz(tz).format('YYYY-MM-DD HH:mm:ss z') : d.toISOString();
