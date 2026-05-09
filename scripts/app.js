@@ -73,6 +73,12 @@ function onDOMContentLoaded() {
   if (!selectedTab || !validTabs.includes(selectedTab)) selectedTab = 'tools';
   openTab(null, selectedTab);
 
+  // Initialize utils sub-tab
+  const validUtilsTabs = ['time', 'generate', 'convert', 'web'];
+  let selectedUtilsTab = localStorage.getItem("selectedUtilsTab");
+  if (!selectedUtilsTab || !validUtilsTabs.includes(selectedUtilsTab)) selectedUtilsTab = 'time';
+  openUtilsTab(null, selectedUtilsTab);
+
   //#region Initialize timestamp input and timezone select
   // Save input values
   timestampInput.addEventListener("input", function () {
@@ -205,6 +211,19 @@ function openTab(evt, tabName) {
 
   // Save the selected tab to localStorage
   localStorage.setItem("selectedTab", tabName);
+}
+
+function openUtilsTab(evt, panelName) {
+  document.querySelectorAll('.utils-panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.utils-tab-button').forEach(b => b.classList.remove('active'));
+  document.getElementById('utils-panel-' + panelName).classList.add('active');
+  if (evt && evt.currentTarget) {
+    evt.currentTarget.classList.add('active');
+  } else {
+    const btn = document.querySelector(`.utils-tab-button[data-utab="${panelName}"]`);
+    if (btn) btn.classList.add('active');
+  }
+  localStorage.setItem('selectedUtilsTab', panelName);
 }
 
 function tidyEditor(editor) {

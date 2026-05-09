@@ -128,323 +128,338 @@
     </div>
 
     <!-------------------------------------------------------------->
-    <!-- Utils Tab — Timestamp, UUID/Token, Unit Conversions -->
+    <!-- Utils Tab — sub-tabbed: Time / Generate / Convert / Web -->
     <!-------------------------------------------------------------->
     <div id="utils" class="tab-content">
 
-      <!-- Timestamp -->
-      <h3 class="utils-section-title"><i class="fas fa-clock"></i> Timestamp</h3>
-      <div class="side-by-side">
-        <div class="editor-container">
-          <div class="button-group">
-            <button class="convert-button" onclick="execute_convertTimestampToDate()">Convert <i class="fa-sharp fa-solid fa-circle-chevron-right"></i></button>
-          </div>
-          <div class="button-group">
-            <button id="pasteTimestampButton" class="action-button"><i class="fas fa-paste"></i> Paste</button>
-            <button id="pasteCurrentButton" class="action-button"><i class="fas fa-clock"></i> Now</button>
-          </div>
-          <div class="field">
-            <input type="text" id="timestampInput" placeholder="Enter Timestamp">
-          </div>
-          <div class="field">
-            <select id="timezoneSelect">
-              <option value="America/New_York">Eastern Time (ET)</option>
-              <option value="America/Chicago" selected>Central Time (CT)</option>
-              <option value="America/Denver">Mountain Time (MT)</option>
-              <option value="America/Phoenix">Mountain Time (Arizona)</option>
-              <option value="America/Los_Angeles">Pacific Time (PT)</option>
-              <option value="America/Anchorage">Alaska Time (AKT)</option>
-              <option value="Pacific/Honolulu">Hawaii-Aleutian Time (HAT)</option>
-            </select>
-          </div>
-          <div class="field">
-            <input type="text" id="timestampFormat" placeholder="Format" value="YYYY-MM-DD HH:mm:ss.SSS">
-          </div>
-        </div>
-        <div class="editor-container">
-          <div class="button-group">
-            <button class="convert-button" onclick="execute_convertDatePartsToTimestamp()"><i class="fa-sharp fa-solid fa-circle-chevron-left"></i> Convert</button>
-          </div>
-          <div class="button-group">
-            <button id="copyTimestampButton" class="action-button"><i class="fas fa-copy"></i> Copy</button>
-          </div>
-          <div class="field">
-            <input type="text" id="dateOutput">
-          </div>
-          <div class="equal-width">
-            <div class="field">
-              <label for="yearInput">Year</label>
-              <input name="yearInput" type="number" id="yearInput" step="1" maxlength="4" placeholder="YYYY">
-            </div>
-            <div class="field">
-              <label for="monthInput">Month</label>
-              <input name="monthInput" type="number" id="monthInput" min="1" max="12" step="1" maxlength="2" placeholder="MM">
-            </div>
-            <div class="field">
-              <label for="dayInput">Day</label>
-              <input name="dayInput" type="number" id="dayInput" min="1" max="31" step="1" maxlength="2" placeholder="DD">
-            </div>
-            <div class="field">
-              <label for="hourInput">Hour (24h)</label>
-              <input name="hourInput" type="number" id="hourInput" min="0" max="23" step="1" maxlength="2" placeholder="HH">
-            </div>
-            <div class="field">
-              <label for="minuteInput">Minutes</label>
-              <input name="minuteInput" type="number" id="minuteInput" step="1" min="0" max="59" maxlength="2" placeholder="MM">
-            </div>
-            <div class="field">
-              <label for="secondInput">Seconds</label>
-              <input name="secondInput" type="number" id="secondInput" step="1" min="0" max="59" maxlength="2" placeholder="SS">
-            </div>
-            <div class="field">
-              <label for="millisecondInput">Milliseconds</label>
-              <input name="millisecondInput" type="number" id="millisecondInput" step="1" min="0" max="999" maxlength="3" placeholder="SSS">
-            </div>
-          </div>
-        </div>
-      </div>
-      <table>
-        <tbody>
-          <tr>
-            <td width="200">Timestamp (ms)</td>
-            <td id="timestampDisplayMilliseconds" class="click-to-copy"></td>
-          </tr>
-          <tr>
-            <td width="200">GMT</td>
-            <td id="timestampDisplayGmt" class="click-to-copy"></td>
-          </tr>
-          <tr>
-            <td>Your Time Zone</td>
-            <td id="timestampDisplayLocal" class="click-to-copy"></td>
-          </tr>
-          <tr>
-            <td width="200">Format</td>
-            <td id="timestampDisplayFormat" class="click-to-copy"></td>
-          </tr>
-          <tr>
-            <td>Relative</td>
-            <td id="timestampDisplayRelative" class="click-to-copy"></td>
-          </tr>
-          <tr>
-            <td>Duration</td>
-            <td id="timestampDisplayDuration" class="click-to-copy"></td>
-          </tr>
-        </tbody>
-      </table>
-
-      <hr class="utils-divider">
-
-      <!-- UUID / Token -->
-      <h3 class="utils-section-title"><i class="fas fa-key"></i> UUID / Token</h3>
-      <div class="button-group">
-        <button class="convert-button" onclick="execute_refreshUuid()">Refresh UUID <i class="fas fa-sync-alt"></i></button>
-      </div>
-      <div class="field">
-        <label for="uuidWithDashes">UUID v4:</label>
-        <input type="text" id="uuidWithDashes">
-        <button class="action-button" onclick="copyToClipboard('uuidWithDashes')"><i class="fas fa-copy"></i></button>
-      </div>
-      <div class="field">
-        <label for="uuidWithoutDashes">UUID (without dashes):</label>
-        <input type="text" id="uuidWithoutDashes">
-        <button class="action-button" onclick="copyToClipboard('uuidWithoutDashes')"><i class="fas fa-copy"></i></button>
-      </div>
-      <div class="token-generator">
-        <div class="field">
-          <label for="tokenLength">Length:</label>
-          <input type="number" id="tokenLength" min="1" max="256" value="42" style="width:80px;">
-          <label><input type="checkbox" id="tokenLowercase" checked> a-z</label>
-          <label><input type="checkbox" id="tokenUppercase" checked> A-Z</label>
-          <label><input type="checkbox" id="tokenNumbers" checked> 0-9</label>
-          <label><input type="checkbox" id="tokenSymbols"> Symbols</label>
-        </div>
-        <div class="field">
-          <label for="tokenOutput">Token:</label>
-          <input type="text" id="tokenOutput" readonly>
-        </div>
-        <div class="field">
-          <button class="convert-button" onclick="generateToken()">Refresh Token <i class="fas fa-sync-alt"></i></button>
-          <button class="action-button" onclick="copyToClipboard('tokenOutput')"><i class="fas fa-copy"></i></button>
-        </div>
+      <!-- Sub-tab navigation -->
+      <div class="utils-tabs">
+        <button class="utils-tab-button" data-utab="time"     onclick="openUtilsTab(event,'time')"><i class="fas fa-clock"></i> Time</button>
+        <button class="utils-tab-button" data-utab="generate" onclick="openUtilsTab(event,'generate')"><i class="fas fa-key"></i> Generate</button>
+        <button class="utils-tab-button" data-utab="convert"  onclick="openUtilsTab(event,'convert')"><i class="fas fa-exchange-alt"></i> Convert</button>
+        <button class="utils-tab-button" data-utab="web"      onclick="openUtilsTab(event,'web')"><i class="fas fa-link"></i> Web</button>
       </div>
 
-      <hr class="utils-divider">
+      <!-- TIME panel: Timestamp + Cron -->
+      <div id="utils-panel-time" class="utils-panel">
 
-      <!-- Unit Conversions -->
-      <h3 class="utils-section-title"><i class="fas fa-exchange-alt"></i> Unit Conversions</h3>
-      <div class="equal-width">
-        <div class="field">
-          <label for="cInput">Celsius</label>
-          <input name="cInput" type="number" id="cInput" step="0.1" placeholder="C">
-        </div>
-        <div class="field-buttons">
-          <label>Temperature</label>
-          <div class="button-container">
-            <button class="convert-button" onclick="execute_convertFtoC()"><i class="fa-sharp fa-solid fa-circle-chevron-left"></i></button>
-            <button class="convert-button" onclick="execute_convertCtoF()"><i class="fa-sharp fa-solid fa-circle-chevron-right"></i></button>
+        <h3 class="utils-section-title"><i class="fas fa-clock"></i> Timestamp</h3>
+        <div class="side-by-side">
+          <div class="editor-container">
+            <div class="button-group">
+              <button class="convert-button" onclick="execute_convertTimestampToDate()">Convert <i class="fa-sharp fa-solid fa-circle-chevron-right"></i></button>
+            </div>
+            <div class="button-group">
+              <button id="pasteTimestampButton" class="action-button"><i class="fas fa-paste"></i> Paste</button>
+              <button id="pasteCurrentButton" class="action-button"><i class="fas fa-clock"></i> Now</button>
+            </div>
+            <div class="field">
+              <input type="text" id="timestampInput" placeholder="Enter Timestamp">
+            </div>
+            <div class="field">
+              <select id="timezoneSelect">
+                <option value="America/New_York">Eastern Time (ET)</option>
+                <option value="America/Chicago" selected>Central Time (CT)</option>
+                <option value="America/Denver">Mountain Time (MT)</option>
+                <option value="America/Phoenix">Mountain Time (Arizona)</option>
+                <option value="America/Los_Angeles">Pacific Time (PT)</option>
+                <option value="America/Anchorage">Alaska Time (AKT)</option>
+                <option value="Pacific/Honolulu">Hawaii-Aleutian Time (HAT)</option>
+              </select>
+            </div>
+            <div class="field">
+              <input type="text" id="timestampFormat" placeholder="Format" value="YYYY-MM-DD HH:mm:ss.SSS">
+            </div>
+          </div>
+          <div class="editor-container">
+            <div class="button-group">
+              <button class="convert-button" onclick="execute_convertDatePartsToTimestamp()"><i class="fa-sharp fa-solid fa-circle-chevron-left"></i> Convert</button>
+            </div>
+            <div class="button-group">
+              <button id="copyTimestampButton" class="action-button"><i class="fas fa-copy"></i> Copy</button>
+            </div>
+            <div class="field">
+              <input type="text" id="dateOutput">
+            </div>
+            <div class="equal-width">
+              <div class="field">
+                <label for="yearInput">Year</label>
+                <input name="yearInput" type="number" id="yearInput" step="1" maxlength="4" placeholder="YYYY">
+              </div>
+              <div class="field">
+                <label for="monthInput">Month</label>
+                <input name="monthInput" type="number" id="monthInput" min="1" max="12" step="1" maxlength="2" placeholder="MM">
+              </div>
+              <div class="field">
+                <label for="dayInput">Day</label>
+                <input name="dayInput" type="number" id="dayInput" min="1" max="31" step="1" maxlength="2" placeholder="DD">
+              </div>
+              <div class="field">
+                <label for="hourInput">Hour (24h)</label>
+                <input name="hourInput" type="number" id="hourInput" min="0" max="23" step="1" maxlength="2" placeholder="HH">
+              </div>
+              <div class="field">
+                <label for="minuteInput">Minutes</label>
+                <input name="minuteInput" type="number" id="minuteInput" step="1" min="0" max="59" maxlength="2" placeholder="MM">
+              </div>
+              <div class="field">
+                <label for="secondInput">Seconds</label>
+                <input name="secondInput" type="number" id="secondInput" step="1" min="0" max="59" maxlength="2" placeholder="SS">
+              </div>
+              <div class="field">
+                <label for="millisecondInput">Milliseconds</label>
+                <input name="millisecondInput" type="number" id="millisecondInput" step="1" min="0" max="999" maxlength="3" placeholder="SSS">
+              </div>
+            </div>
           </div>
         </div>
-        <div class="field">
-          <label for="fInput">Fahrenheit</label>
-          <input name="fInput" type="number" id="fInput" step="0.1" placeholder="F">
+        <table>
+          <tbody>
+            <tr>
+              <td width="200">Timestamp (ms)</td>
+              <td id="timestampDisplayMilliseconds" class="click-to-copy"></td>
+            </tr>
+            <tr>
+              <td width="200">GMT</td>
+              <td id="timestampDisplayGmt" class="click-to-copy"></td>
+            </tr>
+            <tr>
+              <td>Your Time Zone</td>
+              <td id="timestampDisplayLocal" class="click-to-copy"></td>
+            </tr>
+            <tr>
+              <td width="200">Format</td>
+              <td id="timestampDisplayFormat" class="click-to-copy"></td>
+            </tr>
+            <tr>
+              <td>Relative</td>
+              <td id="timestampDisplayRelative" class="click-to-copy"></td>
+            </tr>
+            <tr>
+              <td>Duration</td>
+              <td id="timestampDisplayDuration" class="click-to-copy"></td>
+            </tr>
+          </tbody>
+        </table>
+
+        <hr class="utils-divider">
+
+        <h3 class="utils-section-title"><i class="fas fa-calendar-alt"></i> Cron Expression Parser</h3>
+        <div class="button-group">
+          <input type="text" id="cronInput" placeholder="*/5 * * * *" style="flex:1;padding:8px;background:#2e2e2e;color:#bdbdbd;border:1px solid #333;border-radius:5px;">
+          <select id="cronTimezone" style="padding:8px;background:#2e2e2e;color:#bdbdbd;border:1px solid #333;border-radius:5px;">
+            <option value="America/New_York">Eastern (ET)</option>
+            <option value="America/Chicago" selected>Central (CT)</option>
+            <option value="America/Denver">Mountain (MT)</option>
+            <option value="America/Los_Angeles">Pacific (PT)</option>
+            <option value="UTC">UTC</option>
+          </select>
+          <button class="convert-button" onclick="parseCron()">Parse <i class="fa-sharp fa-solid fa-circle-chevron-right"></i></button>
         </div>
-      </div>
-      <div class="equal-width">
-        <div class="field">
-          <label for="paInput">Pascals</label>
-          <input name="paInput" type="number" id="paInput" step="0.1" placeholder="Pa">
+        <div id="cronDescription" style="margin-top:8px;padding:6px 0;color:#888;font-style:italic;min-height:1.2em;"></div>
+        <div id="cronFireTimes"></div>
+
+      </div><!-- /utils-panel-time -->
+
+      <!-- GENERATE panel: UUID / Token -->
+      <div id="utils-panel-generate" class="utils-panel">
+
+        <h3 class="utils-section-title"><i class="fas fa-key"></i> UUID / Token</h3>
+        <div class="button-group">
+          <button class="convert-button" onclick="execute_refreshUuid()">Refresh UUID <i class="fas fa-sync-alt"></i></button>
         </div>
-        <div class="field-buttons">
-          <label>Pressure</label>
-          <div class="button-container">
-            <button class="convert-button" onclick="execute_convertInHgToPa()"><i class="fa-sharp fa-solid fa-circle-chevron-left"></i></button>
-            <button class="convert-button" onclick="execute_convertPaToInHg()"><i class="fa-sharp fa-solid fa-circle-chevron-right"></i></button>
+        <div class="field">
+          <label for="uuidWithDashes">UUID v4:</label>
+          <input type="text" id="uuidWithDashes">
+          <button class="action-button" onclick="copyToClipboard('uuidWithDashes')"><i class="fas fa-copy"></i></button>
+        </div>
+        <div class="field">
+          <label for="uuidWithoutDashes">UUID (without dashes):</label>
+          <input type="text" id="uuidWithoutDashes">
+          <button class="action-button" onclick="copyToClipboard('uuidWithoutDashes')"><i class="fas fa-copy"></i></button>
+        </div>
+        <div class="token-generator">
+          <div class="field">
+            <label for="tokenLength">Length:</label>
+            <input type="number" id="tokenLength" min="1" max="256" value="42" style="width:80px;">
+            <label><input type="checkbox" id="tokenLowercase" checked> a-z</label>
+            <label><input type="checkbox" id="tokenUppercase" checked> A-Z</label>
+            <label><input type="checkbox" id="tokenNumbers" checked> 0-9</label>
+            <label><input type="checkbox" id="tokenSymbols"> Symbols</label>
+          </div>
+          <div class="field">
+            <label for="tokenOutput">Token:</label>
+            <input type="text" id="tokenOutput" readonly>
+          </div>
+          <div class="field">
+            <button class="convert-button" onclick="generateToken()">Refresh Token <i class="fas fa-sync-alt"></i></button>
+            <button class="action-button" onclick="copyToClipboard('tokenOutput')"><i class="fas fa-copy"></i></button>
           </div>
         </div>
-        <div class="field">
-          <label for="inHgInput">inHg</label>
-          <input name="inHgInput" type="number" id="inHgInput" step="0.1" placeholder="inHg">
-        </div>
-      </div>
-      <div class="equal-width">
-        <div class="field">
-          <label for="millisecondsInput">Milliseconds</label>
-          <input type="number" id="millisecondsInput" placeholder="Milliseconds">
-        </div>
-        <div class="field-buttons">
-          <label>Milliseconds</label>
-          <div class="button-container">
-            <button class="convert-button" onclick="execute_convertTimeToMs()"><i class="fa-sharp fa-solid fa-circle-chevron-left"></i></button>
-            <button class="convert-button" onclick="execute_convertMsToTime()"><i class="fa-sharp fa-solid fa-circle-chevron-right"></i></button>
+
+      </div><!-- /utils-panel-generate -->
+
+      <!-- CONVERT panel: Units + Number Base + Color -->
+      <div id="utils-panel-convert" class="utils-panel">
+
+        <h3 class="utils-section-title"><i class="fas fa-exchange-alt"></i> Unit Conversions</h3>
+        <div class="equal-width">
+          <div class="field">
+            <label for="cInput">Celsius</label>
+            <input name="cInput" type="number" id="cInput" step="0.1" placeholder="C">
+          </div>
+          <div class="field-buttons">
+            <label>Temperature</label>
+            <div class="button-container">
+              <button class="convert-button" onclick="execute_convertFtoC()"><i class="fa-sharp fa-solid fa-circle-chevron-left"></i></button>
+              <button class="convert-button" onclick="execute_convertCtoF()"><i class="fa-sharp fa-solid fa-circle-chevron-right"></i></button>
+            </div>
+          </div>
+          <div class="field">
+            <label for="fInput">Fahrenheit</label>
+            <input name="fInput" type="number" id="fInput" step="0.1" placeholder="F">
           </div>
         </div>
         <div class="equal-width">
           <div class="field">
-            <label for="daysInput">Days</label>
-            <input type="number" id="daysInput" placeholder="Days">
+            <label for="paInput">Pascals</label>
+            <input name="paInput" type="number" id="paInput" step="0.1" placeholder="Pa">
+          </div>
+          <div class="field-buttons">
+            <label>Pressure</label>
+            <div class="button-container">
+              <button class="convert-button" onclick="execute_convertInHgToPa()"><i class="fa-sharp fa-solid fa-circle-chevron-left"></i></button>
+              <button class="convert-button" onclick="execute_convertPaToInHg()"><i class="fa-sharp fa-solid fa-circle-chevron-right"></i></button>
+            </div>
           </div>
           <div class="field">
-            <label for="hoursInput">Hours</label>
-            <input type="number" id="hoursInput" placeholder="Hours">
+            <label for="inHgInput">inHg</label>
+            <input name="inHgInput" type="number" id="inHgInput" step="0.1" placeholder="inHg">
+          </div>
+        </div>
+        <div class="equal-width">
+          <div class="field">
+            <label for="millisecondsInput">Milliseconds</label>
+            <input type="number" id="millisecondsInput" placeholder="Milliseconds">
+          </div>
+          <div class="field-buttons">
+            <label>Milliseconds</label>
+            <div class="button-container">
+              <button class="convert-button" onclick="execute_convertTimeToMs()"><i class="fa-sharp fa-solid fa-circle-chevron-left"></i></button>
+              <button class="convert-button" onclick="execute_convertMsToTime()"><i class="fa-sharp fa-solid fa-circle-chevron-right"></i></button>
+            </div>
+          </div>
+          <div class="equal-width">
+            <div class="field">
+              <label for="daysInput">Days</label>
+              <input type="number" id="daysInput" placeholder="Days">
+            </div>
+            <div class="field">
+              <label for="hoursInput">Hours</label>
+              <input type="number" id="hoursInput" placeholder="Hours">
+            </div>
+            <div class="field">
+              <label for="minutesInput">Minutes</label>
+              <input type="number" id="minutesInput" placeholder="Minutes">
+            </div>
+            <div class="field">
+              <label for="secondsInput">Seconds</label>
+              <input type="number" id="secondsInput" placeholder="Seconds">
+            </div>
+            <div class="field">
+              <label for="millisecondsInput2">Milliseconds</label>
+              <input type="number" id="millisecondsInput2" placeholder="Milliseconds">
+            </div>
+          </div>
+        </div>
+
+        <hr class="utils-divider">
+
+        <h3 class="utils-section-title"><i class="fas fa-hashtag"></i> Number Base Converter</h3>
+        <div class="equal-width">
+          <div class="field">
+            <label for="numDecInput">Decimal</label>
+            <input type="text" id="numDecInput" placeholder="255" oninput="convertNumBase(this, 10)">
           </div>
           <div class="field">
-            <label for="minutesInput">Minutes</label>
-            <input type="number" id="minutesInput" placeholder="Minutes">
+            <label for="numHexInput">Hexadecimal</label>
+            <input type="text" id="numHexInput" placeholder="FF" oninput="convertNumBase(this, 16)">
           </div>
           <div class="field">
-            <label for="secondsInput">Seconds</label>
-            <input type="number" id="secondsInput" placeholder="Seconds">
+            <label for="numBinInput">Binary</label>
+            <input type="text" id="numBinInput" placeholder="11111111" oninput="convertNumBase(this, 2)">
           </div>
           <div class="field">
-            <label for="millisecondsInput2">Milliseconds</label>
-            <input type="number" id="millisecondsInput2" placeholder="Milliseconds">
+            <label for="numOctInput">Octal</label>
+            <input type="text" id="numOctInput" placeholder="377" oninput="convertNumBase(this, 8)">
           </div>
         </div>
-      </div>
 
-      <hr class="utils-divider">
+        <hr class="utils-divider">
 
-      <!-- Number Base Converter -->
-      <h3 class="utils-section-title"><i class="fas fa-hashtag"></i> Number Base Converter</h3>
-      <div class="equal-width">
-        <div class="field">
-          <label for="numDecInput">Decimal</label>
-          <input type="text" id="numDecInput" placeholder="255" oninput="convertNumBase(this, 10)">
+        <h3 class="utils-section-title"><i class="fas fa-palette"></i> Color Converter</h3>
+        <div class="equal-width">
+          <div class="field">
+            <label for="colorHex">HEX</label>
+            <input type="text" id="colorHex" placeholder="#rrggbb" oninput="convertColor('hex')">
+          </div>
+          <div class="field">
+            <label for="colorRgb">RGB</label>
+            <input type="text" id="colorRgb" placeholder="r, g, b" oninput="convertColor('rgb')">
+          </div>
+          <div class="field">
+            <label for="colorHsl">HSL</label>
+            <input type="text" id="colorHsl" placeholder="h, s%, l%" oninput="convertColor('hsl')">
+          </div>
+          <div class="field">
+            <label for="colorHsv">HSV</label>
+            <input type="text" id="colorHsv" placeholder="h, s%, v%" oninput="convertColor('hsv')">
+          </div>
         </div>
-        <div class="field">
-          <label for="numHexInput">Hexadecimal</label>
-          <input type="text" id="numHexInput" placeholder="FF" oninput="convertNumBase(this, 16)">
-        </div>
-        <div class="field">
-          <label for="numBinInput">Binary</label>
-          <input type="text" id="numBinInput" placeholder="11111111" oninput="convertNumBase(this, 2)">
-        </div>
-        <div class="field">
-          <label for="numOctInput">Octal</label>
-          <input type="text" id="numOctInput" placeholder="377" oninput="convertNumBase(this, 8)">
-        </div>
-      </div>
+        <div id="colorSwatch" style="width:100%;height:36px;border-radius:5px;margin-top:8px;border:1px solid #333;background:#1e1e1e;"></div>
 
-      <hr class="utils-divider">
+      </div><!-- /utils-panel-convert -->
 
-      <!-- Color Converter -->
-      <h3 class="utils-section-title"><i class="fas fa-palette"></i> Color Converter</h3>
-      <div class="equal-width">
-        <div class="field">
-          <label for="colorHex">HEX</label>
-          <input type="text" id="colorHex" placeholder="#rrggbb" oninput="convertColor('hex')">
-        </div>
-        <div class="field">
-          <label for="colorRgb">RGB</label>
-          <input type="text" id="colorRgb" placeholder="r, g, b" oninput="convertColor('rgb')">
-        </div>
-        <div class="field">
-          <label for="colorHsl">HSL</label>
-          <input type="text" id="colorHsl" placeholder="h, s%, l%" oninput="convertColor('hsl')">
-        </div>
-        <div class="field">
-          <label for="colorHsv">HSV</label>
-          <input type="text" id="colorHsv" placeholder="h, s%, v%" oninput="convertColor('hsv')">
-        </div>
-      </div>
-      <div id="colorSwatch" style="width:100%;height:36px;border-radius:5px;margin-top:8px;border:1px solid #333;background:#1e1e1e;"></div>
+      <!-- WEB panel: URL Parser / Builder -->
+      <div id="utils-panel-web" class="utils-panel">
 
-      <hr class="utils-divider">
+        <h3 class="utils-section-title"><i class="fas fa-link"></i> URL Parser / Builder</h3>
+        <div class="button-group">
+          <button class="convert-button" onclick="parseUrl()">Parse <i class="fa-sharp fa-solid fa-circle-chevron-right"></i></button>
+          <button class="convert-button" onclick="buildUrl()"><i class="fa-sharp fa-solid fa-circle-chevron-left"></i> Build</button>
+          <button class="action-button" onclick="copyToClipboard('urlInput')"><i class="fas fa-copy"></i> Copy URL</button>
+        </div>
+        <div class="field">
+          <input type="text" id="urlInput" placeholder="https://example.com/path?foo=bar#anchor">
+        </div>
+        <div class="equal-width">
+          <div class="field">
+            <label for="urlProtocol">Protocol</label>
+            <input type="text" id="urlProtocol" placeholder="https:">
+          </div>
+          <div class="field">
+            <label for="urlHost">Host</label>
+            <input type="text" id="urlHost" placeholder="example.com">
+          </div>
+          <div class="field">
+            <label for="urlPort">Port</label>
+            <input type="text" id="urlPort" placeholder="8080">
+          </div>
+          <div class="field">
+            <label for="urlPath">Path</label>
+            <input type="text" id="urlPath" placeholder="/path/to/resource">
+          </div>
+          <div class="field">
+            <label for="urlFragment">Fragment</label>
+            <input type="text" id="urlFragment" placeholder="section">
+          </div>
+        </div>
+        <div class="field">
+          <label for="urlQuery">Query Params (key=value, one per line)</label>
+          <textarea id="urlQuery" rows="4" placeholder="foo=bar&#10;baz=qux" style="width:100%;box-sizing:border-box;min-height:80px;"></textarea>
+        </div>
 
-      <!-- URL Parser / Builder -->
-      <h3 class="utils-section-title"><i class="fas fa-link"></i> URL Parser / Builder</h3>
-      <div class="button-group">
-        <button class="convert-button" onclick="parseUrl()">Parse <i class="fa-sharp fa-solid fa-circle-chevron-right"></i></button>
-        <button class="convert-button" onclick="buildUrl()"><i class="fa-sharp fa-solid fa-circle-chevron-left"></i> Build</button>
-        <button class="action-button" onclick="copyToClipboard('urlInput')"><i class="fas fa-copy"></i> Copy URL</button>
-      </div>
-      <div class="field">
-        <input type="text" id="urlInput" placeholder="https://example.com/path?foo=bar#anchor">
-      </div>
-      <div class="equal-width">
-        <div class="field">
-          <label for="urlProtocol">Protocol</label>
-          <input type="text" id="urlProtocol" placeholder="https:">
-        </div>
-        <div class="field">
-          <label for="urlHost">Host</label>
-          <input type="text" id="urlHost" placeholder="example.com">
-        </div>
-        <div class="field">
-          <label for="urlPort">Port</label>
-          <input type="text" id="urlPort" placeholder="8080">
-        </div>
-        <div class="field">
-          <label for="urlPath">Path</label>
-          <input type="text" id="urlPath" placeholder="/path/to/resource">
-        </div>
-        <div class="field">
-          <label for="urlFragment">Fragment</label>
-          <input type="text" id="urlFragment" placeholder="section">
-        </div>
-      </div>
-      <div class="field">
-        <label for="urlQuery">Query Params (key=value, one per line)</label>
-        <textarea id="urlQuery" rows="4" placeholder="foo=bar&#10;baz=qux" style="width:100%;box-sizing:border-box;min-height:80px;"></textarea>
-      </div>
-
-      <hr class="utils-divider">
-
-      <!-- Cron Expression Parser -->
-      <h3 class="utils-section-title"><i class="fas fa-calendar-alt"></i> Cron Expression Parser</h3>
-      <div class="button-group">
-        <input type="text" id="cronInput" placeholder="*/5 * * * *" style="flex:1;padding:8px;background:#2e2e2e;color:#bdbdbd;border:1px solid #333;border-radius:5px;">
-        <select id="cronTimezone" style="padding:8px;background:#2e2e2e;color:#bdbdbd;border:1px solid #333;border-radius:5px;">
-          <option value="America/New_York">Eastern (ET)</option>
-          <option value="America/Chicago" selected>Central (CT)</option>
-          <option value="America/Denver">Mountain (MT)</option>
-          <option value="America/Los_Angeles">Pacific (PT)</option>
-          <option value="UTC">UTC</option>
-        </select>
-        <button class="convert-button" onclick="parseCron()">Parse <i class="fa-sharp fa-solid fa-circle-chevron-right"></i></button>
-      </div>
-      <div id="cronDescription" style="margin-top:8px;padding:6px 0;color:#888;font-style:italic;min-height:1.2em;"></div>
-      <div id="cronFireTimes"></div>
+      </div><!-- /utils-panel-web -->
 
     </div>
 
