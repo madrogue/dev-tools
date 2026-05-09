@@ -1,117 +1,77 @@
 # Dev Tools — Roadmap & TODO
 
-Each item is a self-contained task. Mark `[x]` when done. Work top-to-bottom; later tasks may depend on earlier ones.
+---
+
+## Completed
+
+**Phase 1** — Bug fixes: removed duplicate function definitions, dead event listeners, stale variable checks; fixed AJV/jsf guards, timestamp typo.
+
+**Phase 2** — Consolidated 7 tabs → 2 (Tools + Utils). All Monaco-editor tools share one two-pane layout with a grouped `<optgroup>` dropdown. Form-based tools (Timestamp, UUID, Conversions) merged into Utils with `<hr>` dividers.
+
+**Phase 3** — Copy/paste audit: verified Paste/Copy/Copy-to-left wiring for all tools.
+
+**Phase 4** — JSON Analyzer tool: detects format, reports item count, key union/intersection, optional keys, null frequencies, depth stats, duplicate `__key`/`$id`, byte size.
+
+**Phase 5** — Key Format Transform tools: Flat → Wrapped (v), Wrapped → Flat, Rewrap (v ↔ value). Auto-detects format on paste.
+
+**Phase 6** — Smart paste & format detection: format badges (JSON/JSON5/TEXT) on both panes, auto-select tool on paste for JSON and Key Transform groups, reverse direction on "← Copy to left" for JSON tools.
+
+**Bug review** — Fixed double `onDOMContentLoaded`, tab button losing active class on load, UUID replaced with `crypto.randomUUID()`, token generation switched to `crypto.getRandomValues()`, error feedback on null JSON conversions, dead `value` parameter removed, `proxy` ordering fixed.
 
 ---
 
-## Phase 1 — Bug Fixes & Dead Code Cleanup
+## Phase 7 — Tools Tab: Quick-Win Conversions (no CDN) ✓
 
-- [x] **Remove duplicate function definitions in `app.js`**: `execute_generateFormSchema()` and `execute_validateObjectAgainstSchema()` are each defined twice (the second definitions override the first). Keep only the correct second version of each.
-- [x] **Fix broken `pasteOutputStringButton` reference in `app.js`**: The listener on line ~364 references `pasteOutputStringButton` which doesn't exist in the HTML. Either add the button to the Strings tab (right pane) or remove the dead listener.
-- [x] **Fix `execute_validateObjectAgainstSchema()`**: It references `window.Ajv7` which is commented out. Replace with a lightweight inline validator or add a clear "AJV not loaded" error message. For now, show a `showValidationResult('AJV library not loaded', 'error')` guard.
-- [x] **Fix `execute_generateObjectFromSchema()`**: It references `window.jsf.generate()` (json-schema-faker) which is also commented out. Add a guard message or replace with a simple hand-rolled mock generator.
-- [x] **Remove `scripts/jsonSchemaTools.js`** (or keep as dead file): It's commented out in `index.html` and its functionality was fully absorbed into `app.js`. Remove the `<script>` comment so there's no confusion.
-- [x] **Fix `sendGraylogMsgToJsonButton` handler**: Uses `typeof jsonInputEditor !== "undefined"` but `jsonInputEditor` is always declared (just null). Change to `if (jsonInputEditor)`.
-- [x] **Fix typo in timestamp table**: "Timstamp (ms)" → "Timestamp (ms)" (`index.html` line 206).
+- [x] **JSON Diff** — recursive value-level diff (not schema-level); reads both panes, outputs `{ added, removed, modified }` with dot-notation paths to right pane.
+- [x] **Base64 Encode / Base64 Decode** — Unicode-safe via `TextEncoder`/`TextDecoder`; decode auto-pretty-prints if result is valid JSON.
+- [x] **JWT Decode** — splits on `.`, base64url-decodes header + payload, adds `expiry` block with ISO date and relative time if `exp` claim present. Uses existing `formatDuration()`.
+- [x] **CSV → JSON / JSON → CSV** — proper quoted-field parser (`parseCsvRow`) handles embedded commas, escaped quotes, `\r\n` line endings; JSON→CSV quotes fields containing commas/quotes/newlines; validates all items are objects.
 
 ---
 
-## Phase 2 — Tab Consolidation (7 → 4 tabs)
+## Phase 8 — Utils Tab: Quick-Win Form Tools (no CDN) ✓
 
-All seven current tabs fall into two structural families: **two-pane Monaco editor tools** and **form-based tools**. Consolidating by family reduces the nav bar from 7 tabs to 4 with no feature loss.
+- [x] **Number Base Converter** — four `<input>` fields (Decimal, Hex, Binary, Octal). Any field change triggers recalculation of the other three. Use `parseInt(val, fromBase).toString(toBase)`. Handle empty/invalid input gracefully.
 
-### Target tab structure
+- [x] **Color Converter** — four fields: HEX (`#rrggbb`), RGB (`r, g, b`), HSL (`h, s%, l%`), HSV (`h, s%, v%`). A small color swatch `<div>` updates to show the current color. Conversion math is pure JS. Changing any field updates all others.
 
-| Tab | Contents | Current tabs absorbed |
-|---|---|---|
-| **Tools** | All Monaco editor tools — JSON, Text, Schema — in one grouped dropdown | "JSON ↔ JSON5", "Graylog", "Strings", "JSON Schema" |
-| **Utils** | Timestamp, UUID/Token, Unit Conversions | "Timestamp to Date", "UUID/Token", "Convert" |
-
-Two tabs total. Two Monaco editor instances total. The tool dropdown uses `<optgroup>` to group tools by category. Editor language mode (json / json5 / plaintext) switches automatically when the selected tool changes.
-
-### Tasks
-
-- [x] **Merge all Monaco-editor tabs into a single "Tools" tab**: JSON↔JSON5, Graylog, Strings, JSON Schema all use the identical two-pane layout. One tab with a grouped `<optgroup>` dropdown replaces four separate tabs. Two Monaco editor instances total. Editor language mode (json / json5 / plaintext) switches automatically when the selected tool changes.
-
-- [x] **Merge Timestamp + UUID/Token + Convert into a single "Utils" tab**: Form-based tools stacked vertically with `<hr>` dividers.
-
-- [x] **Unify button layout**: `[dropdown] [Apply →]` on left, `[← Copy to left] [Paste] [Copy]` on right. Consistent across all tools.
-
-- [x] **Make the tab bar non-wrapping**: `overflow-x: auto; flex-wrap: nowrap` on `.tabs`.
-
-- [x] **Remove right-pane select in Schema**: Replaced with single "← Generate Object" button.
+- [x] **URL Parser/Builder** — one text input for the full URL. On parse (button or auto), break into fields: Protocol, Host, Port, Path, Query Params (editable key/value table), Fragment. A "Build →" button reconstructs the URL from the fields into the top input. Use the built-in `new URL()` API for parsing.
 
 ---
 
-## Phase 3 — Copy/Paste Audit (post-consolidation)
+## Phase 9 — Tools Tab: YAML (CDN) ✓
 
-After Phase 2 consolidation, verify copy/paste works in all tools.
-
-- [x] **JSON tab (new)**: Paste on left auto-applies conversion. Copy on left and right. Right pane has "← Copy to left". Verify all three initial functions (JSON→JSON5, JSON5→JSON, Parse Graylog) work correctly.
-- [x] **Text tab**: Left pane has Paste+Copy. Right pane has Copy only (output-only by design). Dead `pasteOutputStringButton` listener removed in Phase 1.
-- [x] **Schema tab**: All four buttons (Paste Object, Copy Object, Paste Schema, Copy Schema) exist and are wired. ✅
-- [x] **Utils tab — Timestamp**: Paste from clipboard → timestamp input, "Now" button, Copy output. ✅
-- [x] **Utils tab — UUID/Token**: Inline Copy buttons on each field. ✅
-- [x] **Utils tab — Units**: Plain `<input>` fields, no clipboard buttons needed. ✅
-- [x] **After Phases 4–5 (new tools)**: All new tools (Analyze JSON, Flat→Wrapped, Wrapped→Flat, Rewrap) use the shared left/right pane with Paste Left / Copy Right — same pattern as all other tools.
+- [x] **YAML → JSON / JSON → YAML** — two options in a new "YAML" optgroup. CDN: `https://cdnjs.cloudflare.com/ajax/libs/js-yaml/4.1.0/js-yaml.min.js`. Use `jsyaml.load()` and `jsyaml.dump()`. Language modes: `['plaintext', 'json']` and `['json', 'plaintext']`. Add the `<script>` tag to `index.html`.
 
 ---
 
-## Phase 4 — New Tool: JSON/JSON5 Analyzer
+## Phase 10 — Tools Tab: Regex Tester ✓
 
-- [x] Add **"Analyze JSON"** to the JSON optgroup in the tools dropdown (`analyzeJson`)
-- [x] `execute_analyzeJson()` in `app.js`: detects format (JSON vs JSON5), reports top-level type, item count, key union/intersection, optional keys, null frequencies, min/max/avg depth, duplicate `__key`/`$id` detection, byte size. Output is plaintext report in right pane.
-
----
-
-## Phase 5 — New Tool: Key Format Transform
-
-- [x] New file `scripts/keyTransform.js` with pure functions: `detectKeyFormat(arr)`, `flatToWrapped(arr, wrapKey)`, `wrappedToFlat(arr)`, `rewrapKeys(arr, fromKey, toKey)`
-- [x] Three options added to a new "Key Transform" optgroup: "Flat → Wrapped (v)", "Wrapped → Flat", "Rewrap (v ↔ value)"
-- [x] `execute_keyTransform()` in `app.js`; "Rewrap" auto-detects current wrap key and toggles; "Wrapped → Flat" handles both v and value
-- [x] Auto-detect on paste: `autoDetectKeyFormatAndSwitch()` — when pasting while a key-transform tool is active, detects flat/v/value and pre-selects the appropriate conversion
+- [x] `<div id="regexControls" style="display:none">` with pattern + flags inputs; shown only when `regexTest` is selected.
+- [x] `execute_regexTest()`: uses `matchAll` (with `g` flag) or single `exec`; outputs array of `{ index, match, groups }` to right pane. Shows match count in validationResult.
+- [x] Invalid regex shown in `validationResult`.
 
 ---
 
-## Phase 6 — Smart Paste & Format Detection
+## Phase 11 — Tools Tab: JSON Path Explorer (CDN) ✓
 
-- [x] **Detect format on paste**: `detectAndUpdateBadge()` tries `JSON.parse()` → `JSON5.parse()` → TEXT, updates badge live on every content change.
-- [x] **Auto-select tool on paste**: `autoDetectJsonToolAndSwitch()` — when pasting while on `jsonToJson5`/`json5ToJson`, detects the pasted format and switches to the appropriate conversion. `autoDetectKeyFormatAndSwitch()` does the same for key-transform tools.
-- [x] **Reverse direction button**: `execute_copyRightToLeft()` now applies the reverse conversion (JSON5→JSON or JSON→JSON5) when on a reversible JSON tool; falls back to plain copy for all other tools.
-- [x] **Format badges**: `<span id="leftFormatBadge">` / `<span id="rightFormatBadge">` added above each editor. Styled as color-coded pills (blue=JSON, amber=JSON5, grey=TEXT). Updated on every keystroke via `onDidChangeModelContent` and on initial load from localStorage.
-
----
-
-## Phase 7 — ~~Graylog Merge into JSON Tab~~
-
-> **Absorbed into Phase 2.** The Graylog merge is now part of the JSON tab consolidation task. No separate phase needed.
+- [x] `<div id="jsonPathControls" style="display:none">` with JSONPath expression input; shown only when `jsonPathExplorer` is selected.
+- [x] CDN: `https://cdn.jsdelivr.net/npm/jsonpath-plus/dist/index-browser-umd.min.js`. Uses `JSONPath({ path, json })`.
+- [x] `execute_jsonPathExplorer()`: parse left pane as JSON5, evaluate expression, output results array to right pane. Language modes: `['json', 'json']`.
 
 ---
 
-## Suggestions for Future Tools
+## Phase 12 — Tools Tab: Markdown Preview (CDN) ✓
 
-These are additional tools worth considering for later. All must work stand-alone from GitHub Pages (no server, no backend).
+- [x] `<div id="rightPreviewPanel" class="code-editor" style="display:none; overflow:auto; padding:10px;">` alongside rightEditor.
+- [x] `execute_onToolChange`: hides rightEditor + shows rightPreviewPanel for `markdownPreview`; restores Monaco with `rightEditor.layout()` on switch away.
+- [x] CDN: `https://cdn.jsdelivr.net/npm/marked/marked.min.js`. `execute_markdownPreview()`: sets `rightPreviewPanel.innerHTML = marked.parse(...)`.
+- [x] Added to Text optgroup. Dark-theme CSS for h1–h6, code, pre, blockquote, a, table.
 
-1. **JSON Diff** — Paste two JSON/JSON5 objects (one per pane), get a structured diff showing added/removed/changed keys. More ergonomic than Schema Diff which works on schemas, not objects.
+---
 
-2. **JWT Decoder** — Paste a JWT token, decode header + payload (no verification, client-side only). Show expiry relative to now.
+## Phase 13 — Utils Tab: Cron Expression Parser ✓
 
-3. **Base64 Encoder/Decoder** — Encode/decode base64 strings. Handle URL-safe variant. Optionally detect if the decoded value is JSON and pretty-print it.
-
-4. **URL Parser/Builder** — Paste a URL and get protocol, host, path, query params broken out. Edit individual parts and reconstruct. Useful for debugging API calls.
-
-5. **Regex Tester** — Paste a regex and test input strings against it. Show matches highlighted. Support flags (g, i, m, s).
-
-6. **Color Converter** — Convert between HEX, RGB, HSL, HSV. Show a color preview swatch. Useful for design/CSS work.
-
-7. **JSON Path Explorer** — Paste JSON and a JSONPath expression (e.g. `$.items[*].id`), see matching values. Helps debug DAL expressions and data access.
-
-8. **Cron Expression Parser** — Paste a cron string, show human-readable explanation and next N fire times. Client-side only.
-
-9. **YAML ↔ JSON Converter** — Two-pane converter like the JSON/JSON5 tab. Use a CDN-hosted `js-yaml` library.
-
-10. **Number Base Converter** — Convert numbers between decimal, hex, binary, octal. Also useful for bit-flag debugging.
-
-11. **CSV ↔ JSON Converter** — Paste CSV with headers, get JSON array of objects. And vice versa. Pair well with the existing CSV Template generator in JSON Schema tab.
-
-12. **Markdown Preview** — (Lowest priority - nor very necessary) Left pane markdown source, right pane live HTML preview. Use a CDN-hosted `marked.js`.
+- [x] Added as a Utils section with cron expression input, dedicated timezone select, and Parse button.
+- [x] CDN: `cronstrue` for human-readable description. Next-fire-time calculator implemented inline (minute-by-minute iteration, standard 5-field cron, up to ~4 years look-ahead).
+- [x] Outputs human-readable description + table of next 10 fire times in selected timezone (formatted via moment-timezone).

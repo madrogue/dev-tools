@@ -317,9 +317,20 @@ const toolLanguageModes = {
   unquoteString:            ['plaintext', 'plaintext'],
   toggleQuotes:             ['plaintext', 'plaintext'],
   analyzeJson:              ['json',      'plaintext'],
+  jsonDiff:                 ['json',      'json'],
   flatToWrapped:            ['json',      'json'],
   wrappedToFlat:            ['json',      'json'],
   rewrap:                   ['json',      'json'],
+  base64Encode:             ['plaintext', 'plaintext'],
+  base64Decode:             ['plaintext', 'plaintext'],
+  jwtDecode:                ['plaintext', 'json'],
+  csvToJson:                ['plaintext', 'json'],
+  jsonToCsv:                ['json',      'plaintext'],
+  yamlToJson:               ['plaintext', 'json'],
+  jsonToYaml:               ['json',      'plaintext'],
+  regexTest:                ['plaintext', 'plaintext'],
+  jsonPathExplorer:         ['json',      'json'],
+  markdownPreview:          ['plaintext', 'plaintext'],
 };
 
 function execute_onToolChange() {
@@ -330,6 +341,12 @@ function execute_onToolChange() {
   monaco.editor.setModelLanguage(rightEditor.getModel(), rightLang);
   document.getElementById('validationResult').textContent = '';
   document.getElementById('validationResult').className = 'validation-result';
+  document.getElementById('regexControls').style.display = tool === 'regexTest' ? '' : 'none';
+  document.getElementById('jsonPathControls').style.display = tool === 'jsonPathExplorer' ? '' : 'none';
+  const isMarkdown = tool === 'markdownPreview';
+  document.getElementById('rightEditor').style.display = isMarkdown ? 'none' : '';
+  document.getElementById('rightPreviewPanel').style.display = isMarkdown ? '' : 'none';
+  if (!isMarkdown) rightEditor.layout();
 }
 
 function execute_applyTool() {
@@ -340,6 +357,7 @@ function execute_applyTool() {
     case 'json5ToJson':            execute_convertJson5ToJson(); break;
     case 'parseGraylog':           execute_parseGraylogMessage(); break;
     case 'analyzeJson':            execute_analyzeJson(); break;
+    case 'jsonDiff':               execute_jsonDiff(); break;
     // Key Transform group
     case 'flatToWrapped':          execute_keyTransform(); break;
     case 'wrappedToFlat':          execute_keyTransform(); break;
@@ -352,6 +370,21 @@ function execute_applyTool() {
     case 'unquoteString':          execute_applyStringManipulation(); break;
     case 'toggleQuotes':           execute_applyStringManipulation(); break;
     case 'parseStringifiedJson':   execute_applyStringManipulation(); break;
+    case 'base64Encode':           execute_base64Encode(); break;
+    case 'base64Decode':           execute_base64Decode(); break;
+    case 'jwtDecode':              execute_jwtDecode(); break;
+    // Data group
+    case 'csvToJson':              execute_csvToJson(); break;
+    case 'jsonToCsv':              execute_jsonToCsv(); break;
+    // YAML group
+    case 'yamlToJson':             execute_yamlToJson(); break;
+    case 'jsonToYaml':             execute_jsonToYaml(); break;
+    // Regex group
+    case 'regexTest':              execute_regexTest(); break;
+    // JSON Path
+    case 'jsonPathExplorer':       execute_jsonPathExplorer(); break;
+    // Markdown Preview
+    case 'markdownPreview':        execute_markdownPreview(); break;
     // Schema group
     case 'generateJsonSchema':           execute_generateJsonSchema(); break;
     case 'generateFormSchema':           execute_generateFormSchema(); break;
@@ -1144,6 +1177,276 @@ function execute_generateTableComponent() {
   }
 }
 
+function execute_jsonDiff() {
+  try {
+    const a = JSON.parse(leftEditor.getValue());
+    const b = JSON.parse(rightEditor.getValue());
+    const diff = jsonDiff(a, b, '');
+    rightEditor.setValue(JSON.stringify(diff, null, 2));
+    const total = diff.added.length + diff.removed.length + diff.modified.length;
+    showValidationResult(
+      total === 0 ? 'No differences.' : total + ' difference(s) found.',
+      total === 0 ? 'success' : 'error'
+    );
+  } catch (e) {
+    showValidationResult('Error: ' + e.message, 'error');
+  }
+}
+
+function jsonDiff(a, b, path) {
+  const result = { added: [], removed: [], modified: [] };
+  const aIsObj = typeof a === 'object' && a !== null;
+  const bIsObj = typeof b === 'object' && b !== null;
+
+  if (!aIsObj || !bIsObj || Array.isArray(a) !== Array.isArray(b)) {
+    if (JSON.stringify(a) !== JSON.stringify(b)) {
+      result.modified.push({ path: path || '(root)', from: a, to: b });
+    }
+    return result;
+  }
+
+  if (Array.isArray(a)) {
+    const maxLen = Math.max(a.length, b.length);
+    for (let i = 0; i < maxLen; i++) {
+      const p = path + '[' + i + ']';
+      if (i >= a.length) {
+        result.added.push({ path: p, value: b[i] });
+      } else if (i >= b.length) {
+        result.removed.push({ path: p, value: a[i] });
+      } else {
+        const child = jsonDiff(a[i], b[i], p);
+        result.added.push(...child.added);
+        result.removed.push(...child.removed);
+        result.modified.push(...child.modified);
+      }
+    }
+  } else {
+    const allKeys = new Set([...Object.keys(a), ...Object.keys(b)]);
+    allKeys.forEach(function(key) {
+      const p = path ? path + '.' + key : key;
+      if (!(key in a)) {
+        result.added.push({ path: p, value: b[key] });
+      } else if (!(key in b)) {
+        result.removed.push({ path: p, value: a[key] });
+      } else {
+        const child = jsonDiff(a[key], b[key], p);
+        result.added.push(...child.added);
+        result.removed.push(...child.removed);
+        result.modified.push(...child.modified);
+      }
+    });
+  }
+  return result;
+}
+
+function execute_base64Encode() {
+  try {
+    const input = leftEditor.getValue();
+    const bytes = new TextEncoder().encode(input);
+    let binary = '';
+    bytes.forEach(function(b) { binary += String.fromCharCode(b); });
+    rightEditor.setValue(btoa(binary));
+    showValidationResult('Encoded!', 'success');
+  } catch (e) {
+    showValidationResult('Encode error: ' + e.message, 'error');
+  }
+}
+
+function execute_base64Decode() {
+  try {
+    const input = leftEditor.getValue().trim();
+    const binary = atob(input);
+    const bytes = Uint8Array.from(binary, function(c) { return c.charCodeAt(0); });
+    const decoded = new TextDecoder().decode(bytes);
+    try {
+      rightEditor.setValue(JSON.stringify(JSON.parse(decoded), null, 2));
+    } catch {
+      rightEditor.setValue(decoded);
+    }
+    showValidationResult('Decoded!', 'success');
+  } catch (e) {
+    showValidationResult('Decode error: ' + e.message, 'error');
+  }
+}
+
+function execute_jwtDecode() {
+  try {
+    const token = leftEditor.getValue().trim();
+    const parts = token.split('.');
+    if (parts.length < 2) throw new Error('Not a valid JWT — expected header.payload[.signature]');
+
+    function b64urlDecode(s) {
+      s = s.replace(/-/g, '+').replace(/_/g, '/');
+      while (s.length % 4) s += '=';
+      const binary = atob(s);
+      const bytes = Uint8Array.from(binary, function(c) { return c.charCodeAt(0); });
+      return new TextDecoder().decode(bytes);
+    }
+
+    const header  = JSON.parse(b64urlDecode(parts[0]));
+    const payload = JSON.parse(b64urlDecode(parts[1]));
+    const result  = { header, payload };
+
+    if (payload.exp) {
+      const expMs = payload.exp * 1000;
+      const diff  = expMs - Date.now();
+      result.expiry = {
+        timestamp: expMs,
+        date:      new Date(expMs).toISOString(),
+        status:    diff > 0 ? 'valid' : 'expired',
+        relative:  diff > 0
+          ? 'expires in ' + formatDuration(diff)
+          : 'expired ' + formatDuration(-diff) + ' ago'
+      };
+    }
+
+    rightEditor.setValue(JSON.stringify(result, null, 2));
+    showValidationResult('JWT decoded!', 'success');
+  } catch (e) {
+    showValidationResult('Decode error: ' + e.message, 'error');
+  }
+}
+
+function execute_csvToJson() {
+  try {
+    const input = leftEditor.getValue().trim();
+    if (!input) { showValidationResult('No input.', 'error'); return; }
+    const lines = input.split(/\r?\n/).filter(function(l) { return l.trim(); });
+    if (lines.length < 2) { showValidationResult('Need at least a header row and one data row.', 'error'); return; }
+    const headers = parseCsvRow(lines[0]);
+    const result = [];
+    for (let i = 1; i < lines.length; i++) {
+      const values = parseCsvRow(lines[i]);
+      const obj = {};
+      headers.forEach(function(h, j) { obj[h] = values[j] !== undefined ? values[j] : ''; });
+      result.push(obj);
+    }
+    rightEditor.setValue(JSON.stringify(result, null, 2));
+    showValidationResult(result.length + ' row(s) parsed.', 'success');
+  } catch (e) {
+    showValidationResult('Parse error: ' + e.message, 'error');
+  }
+}
+
+function execute_jsonToCsv() {
+  try {
+    const input = leftEditor.getValue().trim();
+    if (!input) { showValidationResult('No input.', 'error'); return; }
+    const arr = JSON.parse(input);
+    if (!Array.isArray(arr)) throw new Error('Input must be a JSON array of objects.');
+    if (arr.length === 0) { rightEditor.setValue(''); showValidationResult('Empty array.', 'success'); return; }
+    if (!arr.every(function(r) { return typeof r === 'object' && r !== null && !Array.isArray(r); })) {
+      throw new Error('All array items must be objects.');
+    }
+    const headers = Array.from(new Set(arr.flatMap(function(r) { return Object.keys(r); })));
+    function escapeCsv(val) {
+      if (val === null || val === undefined) return '';
+      const s = typeof val === 'object' ? JSON.stringify(val) : String(val);
+      return (s.includes(',') || s.includes('"') || s.includes('\n')) ? '"' + s.replace(/"/g, '""') + '"' : s;
+    }
+    const rows = arr.map(function(r) { return headers.map(function(h) { return escapeCsv(r[h]); }).join(','); });
+    rightEditor.setValue([headers.join(',')].concat(rows).join('\n'));
+    showValidationResult(arr.length + ' row(s) converted.', 'success');
+  } catch (e) {
+    showValidationResult('Error: ' + e.message, 'error');
+  }
+}
+
+function parseCsvRow(row) {
+  const fields = [];
+  let i = 0;
+  while (i < row.length) {
+    if (row[i] === '"') {
+      let field = '';
+      i++;
+      while (i < row.length) {
+        if (row[i] === '"' && row[i + 1] === '"') { field += '"'; i += 2; }
+        else if (row[i] === '"') { i++; break; }
+        else { field += row[i++]; }
+      }
+      fields.push(field);
+      if (row[i] === ',') i++;
+    } else {
+      const end = row.indexOf(',', i);
+      if (end === -1) { fields.push(row.slice(i)); break; }
+      fields.push(row.slice(i, end));
+      i = end + 1;
+      if (i === row.length) fields.push(''); // trailing comma → empty last field
+    }
+  }
+  return fields;
+}
+
+/****************************************************
+ * YAML ↔ JSON
+ ****************************************************/
+function execute_yamlToJson() {
+  try {
+    const parsed = jsyaml.load(leftEditor.getValue());
+    rightEditor.setValue(JSON.stringify(parsed, null, 2));
+  } catch (e) {
+    showValidationResult('YAML parse error: ' + e.message, 'error');
+  }
+}
+
+function execute_jsonToYaml() {
+  try {
+    const parsed = JSON5.parse(leftEditor.getValue());
+    rightEditor.setValue(jsyaml.dump(parsed, { lineWidth: -1 }));
+  } catch (e) {
+    showValidationResult('JSON parse error: ' + e.message, 'error');
+  }
+}
+
+/****************************************************
+ * Regex Tester
+ ****************************************************/
+function execute_regexTest() {
+  const pattern = document.getElementById('regexPattern').value;
+  const flags = document.getElementById('regexFlags').value.trim();
+  const text = leftEditor.getValue();
+  if (!pattern) { showValidationResult('Enter a pattern.', 'error'); return; }
+  let re;
+  try { re = new RegExp(pattern, flags); } catch(e) { showValidationResult('Regex error: ' + e.message, 'error'); return; }
+  const results = [];
+  if (re.global) {
+    for (const m of text.matchAll(re)) {
+      results.push({ index: m.index, match: m[0], groups: m.groups || null });
+    }
+  } else {
+    const m = re.exec(text);
+    if (m) results.push({ index: m.index, match: m[0], groups: m.groups || null });
+  }
+  rightEditor.setValue(JSON.stringify(results, null, 2));
+  const count = results.length;
+  showValidationResult(count + ' match' + (count === 1 ? '' : 'es') + ' found', count ? 'success' : 'error');
+}
+
+/****************************************************
+ * JSON Path Explorer
+ ****************************************************/
+function execute_jsonPathExplorer() {
+  const path = document.getElementById('jsonPathExpression').value.trim();
+  if (!path) { showValidationResult('Enter a JSONPath expression.', 'error'); return; }
+  let json;
+  try { json = JSON5.parse(leftEditor.getValue()); } catch(e) { showValidationResult('JSON parse error: ' + e.message, 'error'); return; }
+  try {
+    const result = JSONPath.JSONPath({ path, json });
+    rightEditor.setValue(JSON.stringify(result, null, 2));
+    const count = result.length;
+    showValidationResult(count + ' result' + (count === 1 ? '' : 's'), count ? 'success' : 'error');
+  } catch(e) {
+    showValidationResult('JSONPath error: ' + e.message, 'error');
+  }
+}
+
+/****************************************************
+ * Markdown Preview
+ ****************************************************/
+function execute_markdownPreview() {
+  document.getElementById('rightPreviewPanel').innerHTML = marked.parse(leftEditor.getValue());
+}
+
 // Helper functions for new features
 function flattenSchema(schema, prefix = '', result = {}) {
   if (schema.type === 'object' && schema.properties) {
@@ -1513,6 +1816,262 @@ function generateTableComponent(schema, sampleData) {
   };
 
   return tableComponent;
+}
+
+/****************************************************
+ * Number Base Converter
+ ****************************************************/
+const numBaseFields = [
+  { id: 'numDecInput', base: 10, valid: /^[0-9]+$/ },
+  { id: 'numHexInput', base: 16, valid: /^[0-9a-fA-F]+$/ },
+  { id: 'numBinInput', base:  2, valid: /^[01]+$/ },
+  { id: 'numOctInput', base:  8, valid: /^[0-7]+$/ },
+];
+
+function convertNumBase(input, fromBase) {
+  const val = input.value.trim();
+  const others = numBaseFields.filter(function(f) { return f.base !== fromBase; });
+  if (!val) {
+    others.forEach(function(f) { document.getElementById(f.id).value = ''; });
+    return;
+  }
+  const field = numBaseFields.find(function(f) { return f.base === fromBase; });
+  if (!field.valid.test(val)) return;
+  const n = parseInt(val, fromBase);
+  if (isNaN(n)) return;
+  others.forEach(function(f) {
+    document.getElementById(f.id).value = f.base === 16
+      ? n.toString(16).toUpperCase()
+      : n.toString(f.base);
+  });
+}
+
+/****************************************************
+ * Color Converter
+ ****************************************************/
+function hexToRgb(hex) {
+  hex = hex.replace(/^#/, '');
+  if (hex.length === 3) hex = hex.split('').map(function(c) { return c + c; }).join('');
+  if (hex.length !== 6) return null;
+  const n = parseInt(hex, 16);
+  return isNaN(n) ? null : { r: (n >> 16) & 255, g: (n >> 8) & 255, b: n & 255 };
+}
+
+function rgbToHex(r, g, b) {
+  return '#' + [r, g, b].map(function(v) {
+    return Math.round(Math.max(0, Math.min(255, v))).toString(16).padStart(2, '0');
+  }).join('').toUpperCase();
+}
+
+function rgbToHsl(r, g, b) {
+  r /= 255; g /= 255; b /= 255;
+  const max = Math.max(r, g, b), min = Math.min(r, g, b);
+  const l = (max + min) / 2;
+  if (max === min) return { h: 0, s: 0, l: Math.round(l * 100) };
+  const d = max - min;
+  const s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
+  let h;
+  if      (max === r) h = ((g - b) / d + (g < b ? 6 : 0)) / 6;
+  else if (max === g) h = ((b - r) / d + 2) / 6;
+  else                h = ((r - g) / d + 4) / 6;
+  return { h: Math.round(h * 360), s: Math.round(s * 100), l: Math.round(l * 100) };
+}
+
+function hslToRgb(h, s, l) {
+  h /= 360; s /= 100; l /= 100;
+  if (s === 0) { const v = Math.round(l * 255); return { r: v, g: v, b: v }; }
+  function hue(p, q, t) {
+    if (t < 0) t += 1; if (t > 1) t -= 1;
+    if (t < 1/6) return p + (q - p) * 6 * t;
+    if (t < 1/2) return q;
+    if (t < 2/3) return p + (q - p) * (2/3 - t) * 6;
+    return p;
+  }
+  const q = l < 0.5 ? l * (1 + s) : l + s - l * s, p = 2 * l - q;
+  return { r: Math.round(hue(p,q,h+1/3)*255), g: Math.round(hue(p,q,h)*255), b: Math.round(hue(p,q,h-1/3)*255) };
+}
+
+function rgbToHsv(r, g, b) {
+  r /= 255; g /= 255; b /= 255;
+  const max = Math.max(r, g, b), d = max - Math.min(r, g, b);
+  const s = max === 0 ? 0 : d / max;
+  let h = 0;
+  if (d) {
+    if      (max === r) h = ((g - b) / d + (g < b ? 6 : 0)) / 6;
+    else if (max === g) h = ((b - r) / d + 2) / 6;
+    else                h = ((r - g) / d + 4) / 6;
+  }
+  return { h: Math.round(h * 360), s: Math.round(s * 100), v: Math.round(max * 100) };
+}
+
+function hsvToRgb(h, s, v) {
+  h /= 360; s /= 100; v /= 100;
+  const i = Math.floor(h * 6), f = h * 6 - i;
+  const p = v*(1-s), q = v*(1-f*s), t = v*(1-(1-f)*s);
+  const m = [[v,t,p],[q,v,p],[p,v,t],[p,q,v],[t,p,v],[v,p,q]][i % 6];
+  return { r: Math.round(m[0]*255), g: Math.round(m[1]*255), b: Math.round(m[2]*255) };
+}
+
+function setColorFields(rgb) {
+  const hsl = rgbToHsl(rgb.r, rgb.g, rgb.b);
+  const hsv = rgbToHsv(rgb.r, rgb.g, rgb.b);
+  document.getElementById('colorHex').value = rgbToHex(rgb.r, rgb.g, rgb.b);
+  document.getElementById('colorRgb').value = rgb.r + ', ' + rgb.g + ', ' + rgb.b;
+  document.getElementById('colorHsl').value = hsl.h + ', ' + hsl.s + '%, ' + hsl.l + '%';
+  document.getElementById('colorHsv').value = hsv.h + ', ' + hsv.s + '%, ' + hsv.v + '%';
+  document.getElementById('colorSwatch').style.background = 'rgb(' + rgb.r + ',' + rgb.g + ',' + rgb.b + ')';
+}
+
+function convertColor(source) {
+  try {
+    const get = function(id) { return document.getElementById(id).value.trim(); };
+    const nums = function(id) {
+      return get(id).replace(/%/g, '').split(',').map(function(s) { return parseFloat(s.trim()); });
+    };
+    let rgb;
+    if (source === 'hex') {
+      rgb = hexToRgb(get('colorHex'));
+    } else if (source === 'rgb') {
+      const p = nums('colorRgb');
+      if (p.length !== 3 || p.some(isNaN)) return;
+      rgb = { r: p[0], g: p[1], b: p[2] };
+    } else if (source === 'hsl') {
+      const p = nums('colorHsl');
+      if (p.length !== 3 || p.some(isNaN)) return;
+      rgb = hslToRgb(p[0], p[1], p[2]);
+    } else if (source === 'hsv') {
+      const p = nums('colorHsv');
+      if (p.length !== 3 || p.some(isNaN)) return;
+      rgb = hsvToRgb(p[0], p[1], p[2]);
+    }
+    if (rgb) setColorFields(rgb);
+  } catch(e) {}
+}
+
+/****************************************************
+ * URL Parser / Builder
+ ****************************************************/
+function parseUrl() {
+  const raw = document.getElementById('urlInput').value.trim();
+  if (!raw) return;
+  try {
+    const u = new URL(raw);
+    document.getElementById('urlProtocol').value = u.protocol;
+    document.getElementById('urlHost').value = u.hostname;
+    document.getElementById('urlPort').value = u.port;
+    document.getElementById('urlPath').value = u.pathname;
+    document.getElementById('urlFragment').value = u.hash.slice(1);
+    const params = [];
+    u.searchParams.forEach(function(val, key) { params.push(key + '=' + val); });
+    document.getElementById('urlQuery').value = params.join('\n');
+  } catch(e) {
+    alert('Invalid URL: ' + e.message);
+  }
+}
+
+function buildUrl() {
+  try {
+    const protocol = (document.getElementById('urlProtocol').value.trim() || 'https').replace(/[:/]+$/, '') + ':';
+    const host = document.getElementById('urlHost').value.trim();
+    const port = document.getElementById('urlPort').value.trim();
+    const path = document.getElementById('urlPath').value.trim() || '/';
+    const fragment = document.getElementById('urlFragment').value.trim();
+    const queryText = document.getElementById('urlQuery').value.trim();
+    if (!host) { alert('Host is required.'); return; }
+    const base = protocol + '//' + host + (port ? ':' + port : '') + (path.startsWith('/') ? path : '/' + path);
+    const u = new URL(base);
+    if (queryText) {
+      queryText.split('\n').forEach(function(line) {
+        line = line.trim();
+        if (!line) return;
+        const eq = line.indexOf('=');
+        u.searchParams.append(eq === -1 ? line : line.slice(0, eq), eq === -1 ? '' : line.slice(eq + 1));
+      });
+    }
+    if (fragment) u.hash = fragment;
+    document.getElementById('urlInput').value = u.toString();
+  } catch(e) {
+    alert('Build error: ' + e.message);
+  }
+}
+
+/****************************************************
+ * Cron Expression Parser
+ ****************************************************/
+function parseCronField(field, min, max, names) {
+  const values = new Set();
+  let f = field.toLowerCase();
+  if (names) names.forEach((n, i) => { f = f.replace(new RegExp(n, 'g'), String(min + i)); });
+  for (const part of f.split(',')) {
+    const slash = part.indexOf('/');
+    const step = slash !== -1 ? parseInt(part.slice(slash + 1)) || 1 : 1;
+    const range = slash !== -1 ? part.slice(0, slash) : part;
+    let start, end;
+    if (range === '*') { start = min; end = max; }
+    else if (range.includes('-')) { const [a, b] = range.split('-'); start = +a; end = +b; }
+    else { start = end = +range; }
+    for (let v = start; v <= end; v += step) { if (v >= min && v <= max) values.add(v); }
+  }
+  return [...values].sort((a, b) => a - b);
+}
+
+function parseCron() {
+  const expr = document.getElementById('cronInput').value.trim();
+  const tz = document.getElementById('cronTimezone').value;
+  const descEl = document.getElementById('cronDescription');
+  const timesEl = document.getElementById('cronFireTimes');
+  descEl.textContent = '';
+  timesEl.innerHTML = '';
+  if (!expr) return;
+
+  // Human-readable description
+  if (window.cronstrue) {
+    try { descEl.textContent = cronstrue.toString(expr); }
+    catch(e) { descEl.textContent = 'Invalid expression: ' + e.message; return; }
+  }
+
+  // Parse fields
+  const parts = expr.split(/\s+/);
+  if (parts.length !== 5) { descEl.textContent = 'Expected 5 fields (minute hour day month weekday)'; return; }
+  const [minF, hrF, domF, monF, dowF] = parts;
+  let minutes, hours, doms, months, dows;
+  try {
+    minutes = parseCronField(minF, 0, 59);
+    hours   = parseCronField(hrF,  0, 23);
+    doms    = parseCronField(domF, 1, 31);
+    months  = parseCronField(monF, 1, 12, ['jan','feb','mar','apr','may','jun','jul','aug','sep','oct','nov','dec']);
+    dows    = new Set(parseCronField(dowF, 0, 7, ['sun','mon','tue','wed','thu','fri','sat','sun']).map(d => d % 7));
+  } catch(e) { descEl.textContent = 'Parse error: ' + e.message; return; }
+
+  const domRestricted = domF !== '*';
+  const dowRestricted = dowF !== '*';
+
+  // Find next 10 fire times (iterate minute-by-minute, up to ~4 years)
+  const results = [];
+  const cur = new Date();
+  cur.setSeconds(0, 0);
+  cur.setMinutes(cur.getMinutes() + 1);
+  const MAX_ITER = 2108160;
+  for (let i = 0; i < MAX_ITER && results.length < 10; i++) {
+    const mo = cur.getMonth() + 1, dom = cur.getDate(), dow = cur.getDay(), hr = cur.getHours(), mn = cur.getMinutes();
+    if (months.includes(mo)) {
+      const domMatch = doms.includes(dom), dowMatch = dows.has(dow);
+      const dayOk = (!domRestricted && !dowRestricted) ? true
+        : (domRestricted && !dowRestricted) ? domMatch
+        : (!domRestricted && dowRestricted) ? dowMatch
+        : (domMatch || dowMatch);
+      if (dayOk && hours.includes(hr) && minutes.includes(mn)) results.push(new Date(cur));
+    }
+    cur.setMinutes(cur.getMinutes() + 1);
+  }
+
+  if (!results.length) { timesEl.innerHTML = '<p style="color:#888">No fire times found in the next 4 years.</p>'; return; }
+
+  const rows = results.map((d, idx) => {
+    const fmt = window.moment ? moment(d).tz(tz).format('YYYY-MM-DD HH:mm:ss z') : d.toISOString();
+    return `<tr><td>${idx + 1}</td><td>${fmt}</td></tr>`;
+  }).join('');
+  timesEl.innerHTML = `<table><thead><tr><th>#</th><th>Next Fire Time (${tz})</th></tr></thead><tbody>${rows}</tbody></table>`;
 }
 
 // Simple object to JSON Schema generator (basic types only)
