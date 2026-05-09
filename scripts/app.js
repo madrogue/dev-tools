@@ -1,11 +1,5 @@
-let jsonInputEditor;
-let json5InputEditor;
-let stringInputEditor;
-let stringOutputEditor;
-let graylogMsgInputEditor;
-let graylogMsgOutputEditor;
-let jsonSchemaObjectEditor;
-let jsonSchemaEditor;
+let leftEditor;
+let rightEditor;
 
 let timestampInput = document.getElementById("timestampInput");
 let timezoneSelect = document.getElementById("timezoneSelect");
@@ -91,8 +85,9 @@ function onDOMContentLoaded() {
   console.log(`DOM content loaded`);
 
   // Initialize the selected tab as active
-  let selectedTab = localStorage.getItem("selectedTab") || "jsonToJson5";
-  //document.querySelector(`.tab-button[onclick="openTab(event, '${selectedTab}')"]`).click();
+  const validTabs = ['tools', 'utils'];
+  let selectedTab = localStorage.getItem("selectedTab");
+  if (!selectedTab || !validTabs.includes(selectedTab)) selectedTab = 'tools';
   openTab(null, selectedTab);
 
   //#region Initialize timestamp input and timezone select
@@ -201,37 +196,15 @@ function openTab(evt, tabName) {
     evt.currentTarget.classList.add("active");
   }
 
-  // Initialize editors for the active tab
-  if (tabName === "jsonToJson5") {
-    if (!jsonInputEditor) {
-      jsonInputEditor = initializeEditor("jsonInput", "json");
+  // Initialize editors for the tools tab (lazy, only on first visit)
+  if (tabName === "tools") {
+    if (!leftEditor) {
+      leftEditor = initializeEditor("leftEditor", "json");
     }
-    if (!json5InputEditor) {
-      json5InputEditor = initializeEditor("json5Input", "json5");
+    if (!rightEditor) {
+      rightEditor = initializeEditor("rightEditor", "json");
     }
-  } else if (tabName === "stringManipulation") {
-    if (!stringInputEditor) {
-      stringInputEditor = initializeEditor("stringInput", "plaintext");
-    }
-    if (!stringOutputEditor) {
-      stringOutputEditor = initializeEditor("stringOutput", "plaintext");
-    }
-  } else if (tabName === "graylog") {
-    if (!graylogMsgInputEditor) {
-      graylogMsgInputEditor = initializeEditor("graylogMsgInput", "plaintext");
-    }
-    if (!graylogMsgOutputEditor) {
-      graylogMsgOutputEditor = initializeEditor("graylogMsgOutput", "json");
-    }
-  } else if (tabName === "jsonSchemaTools") {
-    if (!jsonSchemaObjectEditor) {
-      jsonSchemaObjectEditor = initializeEditor("jsonSchemaObject", "json");
-    }
-    if (!jsonSchemaEditor) {
-      jsonSchemaEditor = initializeEditor("jsonSchema", "json");
-    }
-  } else if (tabName === "timestampToDate") {
-    // No Monaco Editor initialization needed for this tab
+    execute_onToolChange();
   }
 
   // Save the selected tab to localStorage
@@ -247,25 +220,9 @@ document.addEventListener("keydown", function (e) {
     document.addEventListener("keydown", function (e) {
       if (e.ctrlKey && e.key === "d") {
         e.preventDefault();
-        if (document.getElementById("jsonInput").parentElement.classList.contains("active")) {
-          tidyEditor(jsonInputEditor);
-        } else if (document.getElementById('json5Input').parentElement.classList.contains('active')) {
-          tidyEditor(json5InputEditor);
-        } else if (document.getElementById('stringInput').parentElement.classList.contains('active')) {
-          tidyEditor(stringInputEditor);
-        } else if (document.getElementById('stringOutput').parentElement.classList.contains('active')) {
-          tidyEditor(stringOutputEditor);
-        } else if (document.getElementById('graylogMsgInput').parentElement.classList.contains('active')) {
-          tidyEditor(graylogMsgInputEditor);
-        } else if (document.getElementById('jsonSchemaInput').parentElement.classList.contains('active')) {
-          tidyEditor(jsonSchemaInputEditor);
-        } else if (document.getElementById('jsonSchemaOutput').parentElement.classList.contains('active')) {
-          tidyEditor(jsonSchemaOutputEditor);
-        }
+        if (leftEditor) tidyEditor(leftEditor);
       }
-    },
-      { once: true }
-    );
+    }, { once: true });
   }
 });
 
@@ -308,43 +265,17 @@ function pasteTimestamp() {
 }
 
 //#region Editor copy/paste buttons
-document.getElementById('copyJsonButton').addEventListener('click', function () {
-  copyFromEditor(jsonInputEditor);
+document.getElementById('pasteLeftButton').addEventListener('click', function () {
+  pasteToEditor(leftEditor, execute_applyTool);
 });
-
-document.getElementById('pasteJsonButton').addEventListener('click', function () {
-  pasteToEditor(jsonInputEditor, execute_convertJsonToJson5);
+document.getElementById('copyLeftButton').addEventListener('click', function () {
+  copyFromEditor(leftEditor);
 });
-
-document.getElementById('copyJson5Button').addEventListener('click', function () {
-  copyFromEditor(json5InputEditor);
+document.getElementById('pasteRightButton').addEventListener('click', function () {
+  pasteToEditor(rightEditor);
 });
-
-document.getElementById('pasteJson5Button').addEventListener('click', function () {
-  pasteToEditor(json5InputEditor, execute_convertJson5ToJson);
-});
-
-document.getElementById('pasteGraylogMsgButton').addEventListener('click', async function () {
-  pasteToEditor(graylogMsgInputEditor, execute_parseGraylogMessage);
-});
-document.getElementById('copyGraylogMsgButton').addEventListener('click', function () {
-  copyFromEditor(graylogMsgInputEditor);
-});
-document.getElementById('copyGraylogMsgOutputButton').addEventListener('click', function () {
-  copyFromEditor(graylogMsgOutputEditor);
-});
-
-document.getElementById('pasteObjectButton').addEventListener('click', function () {
-  pasteToEditor(jsonSchemaObjectEditor);
-});
-document.getElementById('copyObjectButton').addEventListener('click', function () {
-  copyFromEditor(jsonSchemaObjectEditor);
-});
-document.getElementById('pasteSchemaButton').addEventListener('click', function () {
-  pasteToEditor(jsonSchemaEditor);
-});
-document.getElementById('copySchemaButton').addEventListener('click', function () {
-  copyFromEditor(jsonSchemaEditor);
+document.getElementById('copyRightButton').addEventListener('click', function () {
+  copyFromEditor(rightEditor);
 });
 //#endregion
 
@@ -378,18 +309,6 @@ document.getElementById('pasteCurrentButton').addEventListener('click', function
 });
 //#endregion
 
-document.getElementById('sendGraylogMsgToJsonButton').addEventListener('click', function () {
-  // Get the parsed message from the Graylog output editor
-  const parsedMessage = graylogMsgOutputEditor.getValue();
-  // Switch to the JSON/JSON5 tab
-  openTab(null, 'jsonToJson5');
-  // Paste the parsed message into the JSON editor
-  if (jsonInputEditor) {
-    jsonInputEditor.setValue(parsedMessage);
-    execute_convertJsonToJson5();
-  }
-});
-
 function copyToClipboard(elementId) {
   const copyText = document.getElementById(elementId).value;
   navigator.clipboard.writeText(copyText).then(() => {
@@ -399,56 +318,91 @@ function copyToClipboard(elementId) {
   });
 }
 
+// Language modes for each tool: [leftLang, rightLang]
+const toolLanguageModes = {
+  jsonToJson5:              ['json',      'json5'],
+  json5ToJson:              ['json5',     'json'],
+  parseGraylog:             ['plaintext', 'json'],
+  parseStringifiedJson:     ['plaintext', 'json'],
+  stripNewlines:            ['plaintext', 'plaintext'],
+  newlinesToLiteral:        ['plaintext', 'plaintext'],
+  literalToNewlines:        ['plaintext', 'plaintext'],
+  quoteString:              ['plaintext', 'plaintext'],
+  unquoteString:            ['plaintext', 'plaintext'],
+  toggleQuotes:             ['plaintext', 'plaintext'],
+};
+
+function execute_onToolChange() {
+  if (!leftEditor || !rightEditor) return;
+  const tool = document.getElementById('toolFunctionSelect').value;
+  const [leftLang, rightLang] = toolLanguageModes[tool] || ['json', 'json'];
+  monaco.editor.setModelLanguage(leftEditor.getModel(), leftLang);
+  monaco.editor.setModelLanguage(rightEditor.getModel(), rightLang);
+  document.getElementById('validationResult').textContent = '';
+  document.getElementById('validationResult').className = 'validation-result';
+}
+
+function execute_applyTool() {
+  const fn = document.getElementById('toolFunctionSelect').value;
+  switch (fn) {
+    // JSON group
+    case 'jsonToJson5':            execute_convertJsonToJson5(); break;
+    case 'json5ToJson':            execute_convertJson5ToJson(); break;
+    case 'parseGraylog':           execute_parseGraylogMessage(); break;
+    // Text group
+    case 'stripNewlines':          execute_applyStringManipulation(); break;
+    case 'newlinesToLiteral':      execute_applyStringManipulation(); break;
+    case 'literalToNewlines':      execute_applyStringManipulation(); break;
+    case 'quoteString':            execute_applyStringManipulation(); break;
+    case 'unquoteString':          execute_applyStringManipulation(); break;
+    case 'toggleQuotes':           execute_applyStringManipulation(); break;
+    case 'parseStringifiedJson':   execute_applyStringManipulation(); break;
+    // Schema group
+    case 'generateJsonSchema':           execute_generateJsonSchema(); break;
+    case 'generateFormSchema':           execute_generateFormSchema(); break;
+    case 'generateDalMap':               execute_generateDalMap(); break;
+    case 'flattenNestedSchema':          execute_flattenNestedSchema(); break;
+    case 'mergeSchemas':                 execute_mergeSchemas(); break;
+    case 'schemaDiff':                   execute_schemaDiff(); break;
+    case 'generateTypeScript':           execute_generateTypeScript(); break;
+    case 'generateOpenApi':              execute_generateOpenApi(); break;
+    case 'generateMockData':             execute_generateMockData(); break;
+    case 'generateCsvTemplate':          execute_generateCsvTemplate(); break;
+    case 'simplifySchema':               execute_simplifySchema(); break;
+    case 'generateTableComponent':       execute_generateTableComponent(); break;
+    case 'validateObjectAgainstSchema':  execute_validateObjectAgainstSchema(); break;
+    case 'generateObjectFromSchema':     execute_generateObjectFromSchema(); break;
+  }
+}
+
 function execute_convertJsonToJson5() {
-  const jsonInput = jsonInputEditor.getValue();
-  const json5Input = convertJsonToJson5(jsonInput);
-  json5InputEditor.setValue(json5Input);
+  const result = convertJsonToJson5(leftEditor.getValue());
+  if (result !== null) rightEditor.setValue(result);
 }
 
 function execute_convertJson5ToJson() {
-  const json5Input = json5InputEditor.getValue();
-  const jsonInput = convertJson5ToJson(json5Input);
-  jsonInputEditor.setValue(jsonInput);
+  const result = convertJson5ToJson(leftEditor.getValue());
+  if (result !== null) rightEditor.setValue(result);
+}
+
+function execute_copyRightToLeft() {
+  leftEditor.setValue(rightEditor.getValue());
 }
 
 function execute_applyStringManipulation() {
-  const functionSelect = document.getElementById('stringFunctionSelect');
-  const selectedFunction = functionSelect.value;
-  const input = stringInputEditor.getValue();
-  let output = '';
-
-  switch(selectedFunction) {
-    case 'stripNewlines':
-      output = stripNewlines(input);
-      break;
-    case 'newlinesToLiteral':
-      output = newlinesToLiteral(input);
-      break;
-    case 'literalToNewlines':
-      output = literalToNewlines(input);
-      break;
-    case 'quoteString':
-      output = quoteString(input);
-      break;
-    case 'unquoteString':
-      output = unquoteString(input);
-      break;
-    case 'toggleQuotes':
-      output = toggleQuotes(input);
-      break;
-    case 'parseStringifiedJson':
-      output = parseStringifiedJson(input);
-      break;
-    default:
-      output = input;
-  }
-
-  stringOutputEditor.setValue(output);
-}
-
-function execute_copyOutputToInput() {
-  const output = stringOutputEditor.getValue();
-  stringInputEditor.setValue(output);
+  const fn = document.getElementById('toolFunctionSelect').value;
+  const input = leftEditor.getValue();
+  const fnMap = {
+    stripNewlines:        stripNewlines,
+    newlinesToLiteral:    newlinesToLiteral,
+    literalToNewlines:    literalToNewlines,
+    quoteString:          quoteString,
+    unquoteString:        unquoteString,
+    toggleQuotes:         toggleQuotes,
+    parseStringifiedJson: parseStringifiedJson,
+  };
+  const output = fnMap[fn] ? fnMap[fn](input) : input;
+  rightEditor.setValue(output);
 }
 
 function execute_convertTimestampToDate() {
@@ -589,7 +543,7 @@ function execute_convertMsToTime() {
 function execute_parseGraylogMessage() {
   let input = "";
   try {
-    input = graylogMsgInputEditor.getValue();
+    input = leftEditor.getValue();
 
     // Split input into lines, but process as a single string to handle multi-line pastes
     // We'll scan for all message={...} objects using a brace counter
@@ -647,84 +601,26 @@ function execute_parseGraylogMessage() {
     }
 
     if (results.length === 0) {
-      graylogMsgOutputEditor.setValue('No message objects found.');
+      rightEditor.setValue('No message objects found.');
       return;
     }
 
     // Output all message objects as formatted JSON array if more than one, or single object
-    graylogMsgOutputEditor.setValue(
+    rightEditor.setValue(
       results.length === 1
         ? JSON.stringify(results[0], null, 2)
         : JSON.stringify(results, null, 2)
     );
   } catch (e) {
-    graylogMsgOutputEditor.setValue("Parse error:\n" + e.message);
-  }
-}
-
-function execute_applyJsonSchemaFunction() {
-  const functionSelect = document.getElementById('jsonSchemaFunctionSelect');
-  const selectedFunction = functionSelect.value;
-
-  switch(selectedFunction) {
-    case 'generateJsonSchema':
-      execute_generateJsonSchema();
-      break;
-    case 'generateFormSchema':
-      execute_generateFormSchema();
-      break;
-    case 'generateDalMap':
-      execute_generateDalMap();
-      break;
-    case 'flattenNestedSchema':
-      execute_flattenNestedSchema();
-      break;
-    case 'mergeSchemas':
-      execute_mergeSchemas();
-      break;
-    case 'schemaDiff':
-      execute_schemaDiff();
-      break;
-    case 'generateTypeScript':
-      execute_generateTypeScript();
-      break;
-    case 'generateOpenApi':
-      execute_generateOpenApi();
-      break;
-    case 'generateMockData':
-      execute_generateMockData();
-      break;
-    case 'generateCsvTemplate':
-      execute_generateCsvTemplate();
-      break;
-    case 'simplifySchema':
-      execute_simplifySchema();
-      break;
-    case 'generateTableComponent':
-      execute_generateTableComponent();
-      break;
-    case 'validateObjectAgainstSchema':
-      execute_validateObjectAgainstSchema();
-      break;
-  }
-}
-
-function execute_applyJsonSchemaReverseFunction() {
-  const functionSelect = document.getElementById('jsonSchemaReverseFunctionSelect');
-  const selectedFunction = functionSelect.value;
-
-  switch(selectedFunction) {
-    case 'generateObjectFromSchema':
-      execute_generateObjectFromSchema();
-      break;
+    rightEditor.setValue("Parse error:\n" + e.message);
   }
 }
 
 function execute_generateJsonSchema() {
   try {
-    const obj = JSON.parse(jsonSchemaObjectEditor.getValue());
+    const obj = JSON.parse(leftEditor.getValue());
     const schema = objectToJsonSchema(obj);
-    jsonSchemaEditor.setValue(JSON.stringify(schema, null, 2));
+    rightEditor.setValue(JSON.stringify(schema, null, 2));
     showValidationResult('Schema generated!', 'success');
   } catch (e) {
     showValidationResult('Invalid object: ' + e.message, 'error');
@@ -733,7 +629,7 @@ function execute_generateJsonSchema() {
 
 function execute_generateFormSchema() {
   try {
-    let input = jsonSchemaObjectEditor.getValue();
+    let input = leftEditor.getValue();
     let obj = JSON.parse(input);
     let jsonSchema;
 
@@ -746,7 +642,7 @@ function execute_generateFormSchema() {
     }
 
     const formSchema = generateFormSchema(jsonSchema);
-    jsonSchemaEditor.setValue(JSON.stringify(formSchema, null, 2));
+    rightEditor.setValue(JSON.stringify(formSchema, null, 2));
     showValidationResult('Form schema generated!', 'success');
   } catch (e) {
     showValidationResult('Generation error: ' + e.message, 'error');
@@ -759,8 +655,8 @@ function execute_validateObjectAgainstSchema() {
     return;
   }
   try {
-    const obj = JSON.parse(jsonSchemaObjectEditor.getValue());
-    const schema = JSON.parse(jsonSchemaEditor.getValue());
+    const obj = JSON.parse(leftEditor.getValue());
+    const schema = JSON.parse(rightEditor.getValue());
     const ajv = new window.Ajv7({ allErrors: true, strict: false });
     const validate = ajv.compile(schema);
     const valid = validate(obj);
@@ -776,7 +672,7 @@ function execute_validateObjectAgainstSchema() {
 
 function execute_generateDalMap() {
   try {
-    const obj = JSON.parse(jsonSchemaObjectEditor.getValue());
+    const obj = JSON.parse(leftEditor.getValue());
 
     // For DAL map, we just need the top-level keys of the object
     // Assuming the object is a flat key-value structure
@@ -785,7 +681,7 @@ function execute_generateDalMap() {
     }
     const dalMap = Object.keys(obj);
 
-    jsonSchemaEditor.setValue(JSON.stringify(dalMap, null, 2));
+    rightEditor.setValue(JSON.stringify(dalMap, null, 2));
     showValidationResult('DAL map generated!', 'success');
   } catch (e) {
     showValidationResult('Generation error: ' + e.message, 'error');
@@ -798,9 +694,9 @@ function execute_generateObjectFromSchema() {
     return;
   }
   try {
-    const schema = JSON.parse(jsonSchemaEditor.getValue());
+    const schema = JSON.parse(rightEditor.getValue());
     const obj = window.jsf.generate(schema);
-    jsonSchemaObjectEditor.setValue(JSON.stringify(obj, null, 2));
+    leftEditor.setValue(JSON.stringify(obj, null, 2));
     showValidationResult('Object generated!', 'success');
   } catch (e) {
     showValidationResult('Generation error: ' + e.message, 'error');
@@ -898,9 +794,9 @@ function generateFormSchema(jsonSchema) {
 
 function execute_flattenNestedSchema() {
   try {
-    const schema = JSON.parse(jsonSchemaObjectEditor.getValue());
+    const schema = JSON.parse(leftEditor.getValue());
     const flattened = flattenSchema(schema);
-    jsonSchemaEditor.setValue(JSON.stringify(flattened, null, 2));
+    rightEditor.setValue(JSON.stringify(flattened, null, 2));
     showValidationResult('Schema flattened!', 'success');
   } catch (e) {
     showValidationResult('Error: ' + e.message, 'error');
@@ -909,10 +805,10 @@ function execute_flattenNestedSchema() {
 
 function execute_mergeSchemas() {
   try {
-    const schema1 = JSON.parse(jsonSchemaObjectEditor.getValue());
-    const schema2 = JSON.parse(jsonSchemaEditor.getValue());
+    const schema1 = JSON.parse(leftEditor.getValue());
+    const schema2 = JSON.parse(rightEditor.getValue());
     const merged = mergeSchemas(schema1, schema2);
-    jsonSchemaEditor.setValue(JSON.stringify(merged, null, 2));
+    rightEditor.setValue(JSON.stringify(merged, null, 2));
     showValidationResult('Schemas merged!', 'success');
   } catch (e) {
     showValidationResult('Error: ' + e.message, 'error');
@@ -921,10 +817,10 @@ function execute_mergeSchemas() {
 
 function execute_schemaDiff() {
   try {
-    const schema1 = JSON.parse(jsonSchemaObjectEditor.getValue());
-    const schema2 = JSON.parse(jsonSchemaEditor.getValue());
+    const schema1 = JSON.parse(leftEditor.getValue());
+    const schema2 = JSON.parse(rightEditor.getValue());
     const diff = schemaDiff(schema1, schema2);
-    jsonSchemaEditor.setValue(JSON.stringify(diff, null, 2));
+    rightEditor.setValue(JSON.stringify(diff, null, 2));
     showValidationResult('Diff generated!', 'success');
   } catch (e) {
     showValidationResult('Error: ' + e.message, 'error');
@@ -933,7 +829,7 @@ function execute_schemaDiff() {
 
 function execute_generateTypeScript() {
   try {
-    const input = jsonSchemaObjectEditor.getValue();
+    const input = leftEditor.getValue();
     const obj = JSON.parse(input);
     let schema;
 
@@ -944,7 +840,7 @@ function execute_generateTypeScript() {
     }
 
     const typescript = generateTypeScriptInterfaces(schema);
-    jsonSchemaEditor.setValue(typescript);
+    rightEditor.setValue(typescript);
     showValidationResult('TypeScript interfaces generated!', 'success');
   } catch (e) {
     showValidationResult('Error: ' + e.message, 'error');
@@ -953,7 +849,7 @@ function execute_generateTypeScript() {
 
 function execute_generateOpenApi() {
   try {
-    const input = jsonSchemaObjectEditor.getValue();
+    const input = leftEditor.getValue();
     const obj = JSON.parse(input);
     let schema;
 
@@ -964,7 +860,7 @@ function execute_generateOpenApi() {
     }
 
     const openApi = generateOpenApiSchema(schema);
-    jsonSchemaEditor.setValue(JSON.stringify(openApi, null, 2));
+    rightEditor.setValue(JSON.stringify(openApi, null, 2));
     showValidationResult('OpenAPI schema generated!', 'success');
   } catch (e) {
     showValidationResult('Error: ' + e.message, 'error');
@@ -973,7 +869,7 @@ function execute_generateOpenApi() {
 
 function execute_generateMockData() {
   try {
-    const input = jsonSchemaObjectEditor.getValue();
+    const input = leftEditor.getValue();
     const obj = JSON.parse(input);
     let schema;
 
@@ -984,7 +880,7 @@ function execute_generateMockData() {
     }
 
     const mockData = generateMockDataFromSchema(schema);
-    jsonSchemaEditor.setValue(JSON.stringify(mockData, null, 2));
+    rightEditor.setValue(JSON.stringify(mockData, null, 2));
     showValidationResult('Mock data generated!', 'success');
   } catch (e) {
     showValidationResult('Error: ' + e.message, 'error');
@@ -993,7 +889,7 @@ function execute_generateMockData() {
 
 function execute_generateCsvTemplate() {
   try {
-    const input = jsonSchemaObjectEditor.getValue();
+    const input = leftEditor.getValue();
     const obj = JSON.parse(input);
     let schema;
 
@@ -1004,7 +900,7 @@ function execute_generateCsvTemplate() {
     }
 
     const csv = generateCsvTemplate(schema);
-    jsonSchemaEditor.setValue(csv);
+    rightEditor.setValue(csv);
     showValidationResult('CSV template generated!', 'success');
   } catch (e) {
     showValidationResult('Error: ' + e.message, 'error');
@@ -1013,9 +909,9 @@ function execute_generateCsvTemplate() {
 
 function execute_simplifySchema() {
   try {
-    const schema = JSON.parse(jsonSchemaObjectEditor.getValue());
+    const schema = JSON.parse(leftEditor.getValue());
     const simplified = simplifySchema(schema);
-    jsonSchemaEditor.setValue(JSON.stringify(simplified, null, 2));
+    rightEditor.setValue(JSON.stringify(simplified, null, 2));
     showValidationResult('Schema simplified!', 'success');
   } catch (e) {
     showValidationResult('Error: ' + e.message, 'error');
@@ -1024,7 +920,7 @@ function execute_simplifySchema() {
 
 function execute_generateTableComponent() {
   try {
-    const input = jsonSchemaObjectEditor.getValue();
+    const input = leftEditor.getValue();
     const obj = JSON.parse(input);
     let schema;
 
@@ -1037,7 +933,7 @@ function execute_generateTableComponent() {
     }
 
     const tableComponent = generateTableComponent(schema, obj);
-    jsonSchemaEditor.setValue(JSON.stringify(tableComponent, null, 2));
+    rightEditor.setValue(JSON.stringify(tableComponent, null, 2));
     showValidationResult('Table component generated!', 'success');
   } catch (e) {
     showValidationResult('Error: ' + e.message, 'error');

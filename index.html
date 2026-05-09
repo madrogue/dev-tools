@@ -17,120 +17,83 @@
   <script src="https://unpkg.com/json5@2/dist/index.min.js"></script>
   <script src="https://unpkg.com/monaco-editor@latest/min/vs/loader.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/uuid@8.3.2/dist/umd/uuidv4.min.js"></script>
-  <!-- <script src="https://cdn.jsdelivr.net/npm/ajv@8/dist/ajv7.min.js"></script> -->
-  <!-- <script src="https://cdn.jsdelivr.net/npm/json-schema-faker@0.5.0-rcv.56/dist/json-schema-faker.min.js"></script> -->
 </head>
 
 <body>
   <div class="container">
     <div class="tabs">
-      <button class="tab-button active" onclick="openTab(event, 'jsonToJson5')">JSON <i class="fas fa-left-right"></i> JSON5</button>
-      <button class="tab-button" onclick="openTab(event, 'graylog')"><i class="fas fa-envelope"></i> Graylog</button>
-      <button class="tab-button" onclick="openTab(event, 'stringManipulation')"><i class="fas fa-filter"></i> Strings</button>
-      <button class="tab-button" onclick="openTab(event, 'timestampToDate')"><i class="fas fa-clock"></i> Timestamp to Date</button>
-      <button class="tab-button" onclick="openTab(event, 'uuid')"><i class="fas fa-key"></i> UUID/Token</button>
-      <button class="tab-button" onclick="openTab(event, 'convert')"><i class="fas fa-exchange-alt"></i> Convert</button>
-      <button class="tab-button" onclick="openTab(event, 'jsonSchemaTools')"><i class="fas fa-project-diagram"></i> JSON Schema</button>
+      <button class="tab-button active" onclick="openTab(event, 'tools')">Tools</button>
+      <button class="tab-button" onclick="openTab(event, 'utils')"><i class="fas fa-tools"></i> Utils</button>
     </div>
 
     <!-------------------------------------------------------------->
-    <!--Convert JSON to JSON5-->
+    <!-- Tools Tab — all Monaco-editor tools in one grouped dropdown -->
     <!-------------------------------------------------------------->
-    <div id="jsonToJson5" class="tab-content">
+    <div id="tools" class="tab-content">
       <div class="side-by-side">
         <div class="editor-container">
           <div class="button-group">
-            <button class="convert-button" onclick="execute_convertJsonToJson5()">JSON <i class="fa-sharp fa-solid fa-circle-chevron-right"></i></button>
-          </div>
-          <div class="button-group">
-            <button id="pasteJsonButton" class="action-button"><i class="fas fa-paste"></i> Paste</button>
-            <button id="copyJsonButton" class="action-button"><i class="fas fa-copy"></i> Copy</button>
-          </div>
-          <!-- <textarea id="jsonInput" placeholder="JSON"></textarea> -->
-          <div id="jsonInput" class="code-editor"></div>
-        </div>
-        <div class="editor-container">
-          <div class="button-group">
-            <button class="convert-button" onclick="execute_convertJson5ToJson()"><i class="fa-sharp fa-solid fa-circle-chevron-left"></i> JSON5</button>
-          </div>
-          <div class="button-group">
-            <button id="pasteJson5Button" class="action-button"><i class="fas fa-paste"></i> Paste</button>
-            <button id="copyJson5Button" class="action-button"><i class="fas fa-copy"></i> Copy</button>
-          </div>
-          <!-- <textarea id="json5Input" placeholder="JSON5"></textarea> -->
-          <div id="json5Input" class="code-editor"></div>
-        </div>
-      </div>
-    </div>
-
-    <!-------------------------------------------------------------->
-    <!--Parse Graylog-->
-    <!-------------------------------------------------------------->
-    <div id="graylog" class="tab-content">
-      <div class="side-by-side">
-        <div class="editor-container">
-          <div class="button-group">
-            <button class="convert-button" onclick="execute_parseGraylogMessage()">Parse <i class="fa-sharp fa-solid fa-circle-chevron-right"></i></button>
-          </div>
-          <div class="button-group">
-            <button id="pasteGraylogMsgButton" class="action-button"><i class="fas fa-paste"></i> Paste</button>
-            <button id="copyGraylogMsgButton" class="action-button"><i class="fas fa-copy"></i> Copy</button>
-          </div>
-          <div id="graylogMsgInput" class="code-editor"></div>
-        </div>
-        <div class="editor-container">
-          <div class="button-group">
-            <button id="copyGraylogMsgOutputButton" class="action-button"><i class="fas fa-copy"></i> Copy</button>
-            <button id="sendGraylogMsgToJsonButton" class="action-button"><i class="fas fa-arrow-right"></i> To JSON Tab</button>
-          </div>
-          <div id="graylogMsgOutput" class="code-editor"></div>
-        </div>
-      </div>
-    </div>
-
-    <!-------------------------------------------------------------->
-    <!--String Tools-->
-    <!-------------------------------------------------------------->
-    <div id="stringManipulation" class="tab-content">
-      <!--String Manipulation-->
-      <div class="side-by-side">
-        <div class="editor-container">
-          <div class="button-group">
-            <select id="stringFunctionSelect">
-              <option value="stripNewlines">Strip Newlines</option>
-              <option value="newlinesToLiteral">Newlines to \n</option>
-              <option value="literalToNewlines">\n to Newlines</option>
-              <option value="quoteString">Quote</option>
-              <option value="unquoteString">Unquote</option>
-              <option value="toggleQuotes">Toggle Quotes</option>
-              <option value="parseStringifiedJson">Parse Stringified JSON</option>
+            <select id="toolFunctionSelect" onchange="execute_onToolChange()">
+              <optgroup label="JSON">
+                <option value="jsonToJson5">JSON → JSON5</option>
+                <option value="json5ToJson">JSON5 → JSON</option>
+                <option value="parseGraylog">Parse Graylog</option>
+              </optgroup>
+              <optgroup label="Text">
+                <option value="stripNewlines">Strip Newlines</option>
+                <option value="newlinesToLiteral">Newlines to \n</option>
+                <option value="literalToNewlines">\n to Newlines</option>
+                <option value="quoteString">Quote</option>
+                <option value="unquoteString">Unquote</option>
+                <option value="toggleQuotes">Toggle Quotes</option>
+                <option value="parseStringifiedJson">Parse Stringified JSON</option>
+              </optgroup>
+              <optgroup label="Schema">
+                <option value="generateJsonSchema">Generate JSON Schema</option>
+                <option value="generateFormSchema">Generate Form Schema</option>
+                <option value="generateDalMap">Generate DAL Map</option>
+                <option value="flattenNestedSchema">Flatten Nested Schema</option>
+                <option value="mergeSchemas">Merge Schemas (uses both panes)</option>
+                <option value="schemaDiff">Schema Diff (uses both panes)</option>
+                <option value="generateTypeScript">Generate TypeScript Interfaces</option>
+                <option value="generateOpenApi">Generate OpenAPI Schema</option>
+                <option value="generateMockData">Generate Mock Data</option>
+                <option value="generateCsvTemplate">Generate CSV Template</option>
+                <option value="simplifySchema">Simplify Schema</option>
+                <option value="generateTableComponent">Generate Table Component</option>
+                <option value="validateObjectAgainstSchema">Validate Object (uses both panes)</option>
+                <option value="generateObjectFromSchema">Generate Object from Schema (right → left)</option>
+              </optgroup>
             </select>
-            <button class="convert-button" onclick="execute_applyStringManipulation()">Apply <i class="fa-sharp fa-solid fa-circle-chevron-right"></i></button>
+            <button class="convert-button" onclick="execute_applyTool()">Apply <i class="fa-sharp fa-solid fa-circle-chevron-right"></i></button>
           </div>
           <div class="button-group">
-            <button id="pasteInputStringButton" class="action-button"><i class="fas fa-paste"></i> Paste</button>
-            <button id="copyInputStringButton" class="action-button"><i class="fas fa-copy"></i> Copy</button>
+            <button id="pasteLeftButton" class="action-button"><i class="fas fa-paste"></i> Paste</button>
+            <button id="copyLeftButton" class="action-button"><i class="fas fa-copy"></i> Copy</button>
           </div>
-          <!-- <textarea id="stringInput" placeholder="Input..."></textarea> -->
-          <div id="stringInput" class="code-editor"></div>
+          <div id="leftEditor" class="code-editor"></div>
         </div>
         <div class="editor-container">
           <div class="button-group">
-            <button class="convert-button" onclick="execute_copyOutputToInput()"><i class="fa-sharp fa-solid fa-circle-chevron-left"></i> Copy</button>
+            <button class="convert-button" onclick="execute_copyRightToLeft()"><i class="fa-sharp fa-solid fa-circle-chevron-left"></i> Copy to left</button>
           </div>
           <div class="button-group">
-            <button id="copyOutputStringButton" class="action-button"><i class="fas fa-copy"></i> Copy</button>
+            <button id="pasteRightButton" class="action-button"><i class="fas fa-paste"></i> Paste</button>
+            <button id="copyRightButton" class="action-button"><i class="fas fa-copy"></i> Copy</button>
           </div>
-          <!-- <textarea id="stringOutput" placeholder="Output..." readonly></textarea> -->
-          <div id="stringOutput" class="code-editor"></div>
+          <div id="rightEditor" class="code-editor"></div>
         </div>
       </div>
+      <div class="validation-result" id="validationResult"></div>
     </div>
 
     <!-------------------------------------------------------------->
-    <!--Timestamp Tools-->
+    <!-- Utils Tab — Timestamp, UUID/Token, Unit Conversions -->
     <!-------------------------------------------------------------->
-    <div id="timestampToDate" class="tab-content">
+    <div id="utils" class="tab-content">
+
+      <!-- Timestamp -->
+      <h3 class="utils-section-title"><i class="fas fa-clock"></i> Timestamp</h3>
       <div class="side-by-side">
         <div class="editor-container">
           <div class="button-group">
@@ -138,7 +101,7 @@
           </div>
           <div class="button-group">
             <button id="pasteTimestampButton" class="action-button"><i class="fas fa-paste"></i> Paste</button>
-            <button id="pasteCurrentButton" class="action-button"><i class="fas fa-paste"></i> Now</button>
+            <button id="pasteCurrentButton" class="action-button"><i class="fas fa-clock"></i> Now</button>
           </div>
           <div class="field">
             <input type="text" id="timestampInput" placeholder="Enter Timestamp">
@@ -228,12 +191,11 @@
           </tr>
         </tbody>
       </table>
-    </div>
 
-    <!-------------------------------------------------------------->
-    <!-- UUID Tools -->
-    <!-------------------------------------------------------------->
-    <div id="uuid" class="tab-content">
+      <hr class="utils-divider">
+
+      <!-- UUID / Token -->
+      <h3 class="utils-section-title"><i class="fas fa-key"></i> UUID / Token</h3>
       <div class="button-group">
         <button class="convert-button" onclick="execute_refreshUuid()">Refresh UUID <i class="fas fa-sync-alt"></i></button>
       </div>
@@ -247,8 +209,6 @@
         <input type="text" id="uuidWithoutDashes">
         <button class="action-button" onclick="copyToClipboard('uuidWithoutDashes')"><i class="fas fa-copy"></i></button>
       </div>
-
-      <!-- Token Generator -->
       <div class="token-generator">
         <div class="field">
           <label for="tokenLength">Length:</label>
@@ -267,15 +227,14 @@
           <button class="action-button" onclick="copyToClipboard('tokenOutput')"><i class="fas fa-copy"></i></button>
         </div>
       </div>
-    </div>
 
-    <!-------------------------------------------------------------->
-    <!-- Conversion Tools -->
-    <!-------------------------------------------------------------->
-    <div id="convert" class="tab-content">
+      <hr class="utils-divider">
+
+      <!-- Unit Conversions -->
+      <h3 class="utils-section-title"><i class="fas fa-exchange-alt"></i> Unit Conversions</h3>
       <div class="equal-width">
         <div class="field">
-          <label for="cInput">Celcius</label>
+          <label for="cInput">Celsius</label>
           <input name="cInput" type="number" id="cInput" step="0.1" placeholder="C">
         </div>
         <div class="field-buttons">
@@ -290,7 +249,6 @@
           <input name="fInput" type="number" id="fInput" step="0.1" placeholder="F">
         </div>
       </div>
-      <!-- Convert pressure -->
       <div class="equal-width">
         <div class="field">
           <label for="paInput">Pascals</label>
@@ -308,7 +266,6 @@
           <input name="inHgInput" type="number" id="inHgInput" step="0.1" placeholder="inHg">
         </div>
       </div>
-      <!-- Convert milliseconds -->
       <div class="equal-width">
         <div class="field">
           <label for="millisecondsInput">Milliseconds</label>
@@ -344,53 +301,7 @@
           </div>
         </div>
       </div>
-    </div>
 
-    <!-------------------------------------------------------------->
-    <!-- JSON Schema Tools -->
-    <!-------------------------------------------------------------->
-    <div id="jsonSchemaTools" class="tab-content">
-      <div class="side-by-side">
-        <div class="editor-container">
-          <div class="button-group">
-            <select id="jsonSchemaFunctionSelect">
-              <option value="generateJsonSchema">Generate JSON Schema</option>
-              <option value="generateFormSchema">Generate Form Schema</option>
-              <option value="generateDalMap">Generate DAL Map</option>
-              <option value="flattenNestedSchema">Flatten Nested Schema</option>
-              <option value="mergeSchemas">Merge Schemas (with right pane)</option>
-              <option value="schemaDiff">Schema Diff (with right pane)</option>
-              <option value="generateTypeScript">Generate TypeScript Interfaces</option>
-              <option value="generateOpenApi">Generate OpenAPI Schema</option>
-              <option value="generateMockData">Generate Mock Data</option>
-              <option value="generateCsvTemplate">Generate CSV Template</option>
-              <option value="simplifySchema">Simplify Schema</option>
-              <option value="generateTableComponent">Generate Table Component</option>
-              <option value="validateObjectAgainstSchema">Validate Object</option>
-            </select>
-            <button class="convert-button" onclick="execute_applyJsonSchemaFunction()">Apply <i class="fa-sharp fa-solid fa-circle-chevron-right"></i></button>
-          </div>
-          <div class="button-group">
-            <button id="pasteObjectButton" class="action-button"><i class="fas fa-paste"></i> Paste</button>
-            <button id="copyObjectButton" class="action-button"><i class="fas fa-copy"></i> Copy</button>
-          </div>
-          <div id="jsonSchemaObject" class="code-editor"></div>
-          <div class="validation-result" id="validationResult"></div>
-        </div>
-        <div class="editor-container">
-          <div class="button-group">
-            <select id="jsonSchemaReverseFunctionSelect">
-              <option value="generateObjectFromSchema">Generate Object from Schema</option>
-            </select>
-            <button class="convert-button" onclick="execute_applyJsonSchemaReverseFunction()"><i class="fa-sharp fa-solid fa-circle-chevron-left"></i> Apply</button>
-          </div>
-          <div class="button-group">
-            <button id="pasteSchemaButton" class="action-button"><i class="fas fa-paste"></i> Paste</button>
-            <button id="copySchemaButton" class="action-button"><i class="fas fa-copy"></i> Copy</button>
-          </div>
-          <div id="jsonSchema" class="code-editor"></div>
-        </div>
-      </div>
     </div>
 
     <script src="scripts/jsonToJson5.js"></script>
@@ -400,7 +311,6 @@
     <script src="scripts/uuid.js"></script>
     <script src="scripts/convert.js"></script>
     <script src="scripts/app.js"></script>
-    <!-- <script src="https://cdn.jsdelivr.net/npm/ajv@8/dist/ajv7.min.js"></script> -->
 </body>
 
 </html>

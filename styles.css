@@ -1,27 +1,22 @@
-/* JSON Schema Tools tab styles */
-#jsonSchemaTools .side-by-side {
-  display: flex;
-  gap: 1rem;
+/* Utils tab styles */
+#utils .side-by-side {
+  flex: 0 0 auto;
 }
 
-#jsonSchemaTools .editor-container {
-  flex: 1;
-  min-width: 0;
-  display: flex;
-  flex-direction: column;
+.utils-section-title {
+  margin: 0 0 0.5rem 0;
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: #777;
+  font-weight: 500;
 }
 
-#jsonSchemaTools .code-editor {
-  height: 300px;
-  min-height: 200px;
-  border: 1px solid #333;
-  border-radius: 4px;
-  margin-top: 0.5rem;
-  background: #1e1e1e;
-}
-
-#jsonSchemaTools .button-group {
-  margin-bottom: 0.5rem;
+.utils-divider {
+  border: none;
+  border-top: 1px solid #333;
+  margin: 1.5rem 0;
+  flex-shrink: 0;
 }
 
 .validation-result {
@@ -76,10 +71,11 @@ h1 {
 .tabs {
   display: flex;
   justify-content: center;
-  /* padding: 10px 0; */
   padding-bottom: 10px;
   width: 100%;
   gap: 10px;
+  overflow-x: auto;
+  flex-wrap: nowrap;
 }
 
 .tab-content {

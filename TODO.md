@@ -24,37 +24,22 @@ All seven current tabs fall into two structural families: **two-pane Monaco edit
 
 | Tab | Contents | Current tabs absorbed |
 |---|---|---|
-| **JSON** | JSON↔JSON5, Graylog Parse, + future: Analyze, Key Transform | "JSON ↔ JSON5", "Graylog" |
-| **Text** | All string operations | "Strings" |
-| **Schema** | All 13 JSON Schema functions | "JSON Schema" (renamed) |
+| **Tools** | All Monaco editor tools — JSON, Text, Schema — in one grouped dropdown | "JSON ↔ JSON5", "Graylog", "Strings", "JSON Schema" |
 | **Utils** | Timestamp, UUID/Token, Unit Conversions | "Timestamp to Date", "UUID/Token", "Convert" |
+
+Two tabs total. Two Monaco editor instances total. The tool dropdown uses `<optgroup>` to group tools by category. Editor language mode (json / json5 / plaintext) switches automatically when the selected tool changes.
 
 ### Tasks
 
-- [ ] **Merge "JSON ↔ JSON5" and "Graylog" into a new "JSON" tab**: Both tabs share the identical two-pane Monaco layout. Replace them with a single tab using the same dropdown+Apply pattern the Schema tab already uses. The left dropdown starts with:
-  - JSON → JSON5
-  - JSON5 → JSON
-  - Parse Graylog
-  
-  The right pane gets a "← Copy to left" button (replacing the Graylog "Send to JSON tab" button, which is no longer needed). This also absorbs Phase 7 (Graylog merge) — no need for a separate phase.
+- [x] **Merge all Monaco-editor tabs into a single "Tools" tab**: JSON↔JSON5, Graylog, Strings, JSON Schema all use the identical two-pane layout. One tab with a grouped `<optgroup>` dropdown replaces four separate tabs. Two Monaco editor instances total. Editor language mode (json / json5 / plaintext) switches automatically when the selected tool changes.
 
-- [ ] **Rename "JSON Schema" → "Schema"** in the tab button label (HTML only, no JS changes needed).
+- [x] **Merge Timestamp + UUID/Token + Convert into a single "Utils" tab**: Form-based tools stacked vertically with `<hr>` dividers.
 
-- [ ] **Rename "Strings" → "Text"** in the tab button label.
+- [x] **Unify button layout**: `[dropdown] [Apply →]` on left, `[← Copy to left] [Paste] [Copy]` on right. Consistent across all tools.
 
-- [ ] **Merge Timestamp + UUID/Token + Convert into a single "Utils" tab**: These are all form-based (no Monaco editors) and small enough to stack vertically as labeled sections with a `<hr>` divider between them. Order: Timestamp → UUID/Token → Unit Conversions. Remove the three old tabs.
+- [x] **Make the tab bar non-wrapping**: `overflow-x: auto; flex-wrap: nowrap` on `.tabs`.
 
-- [ ] **Unify left-pane button layout across JSON and Text tabs** to match Schema tab's existing pattern:
-  ```
-  [Tool dropdown ▾]  [Apply →]
-  [⎘ Paste]  [⎘ Copy]
-  [Monaco editor]
-  ```
-  The right pane should always have: `[← Copy to left]` and `[⎘ Copy]`.
-
-- [ ] **Make the tab bar non-wrapping**: Add `overflow-x: auto; flex-wrap: nowrap;` to `.tabs` so it scrolls horizontally on narrow viewports instead of wrapping to a second line.
-
-- [ ] **Reduce visual noise in the Schema tab right pane**: The right-side select currently has only one option ("Generate Object from Schema"). Replace the select+button with a single plain button `← Generate Object` until more reverse operations are added.
+- [x] **Remove right-pane select in Schema**: Replaced with single "← Generate Object" button.
 
 ---
 
@@ -62,12 +47,12 @@ All seven current tabs fall into two structural families: **two-pane Monaco edit
 
 After Phase 2 consolidation, verify copy/paste works in all tools.
 
-- [ ] **JSON tab (new)**: Paste on left auto-applies conversion. Copy on left and right. Right pane has "← Copy to left". Verify all three initial functions (JSON→JSON5, JSON5→JSON, Parse Graylog) work correctly.
-- [ ] **Text tab**: Left pane has Paste+Copy. Right pane currently has Copy only — remove the dead `pasteOutputStringButton` listener (Phase 1) and decide: add a Paste button to right pane, or leave as output-only.
-- [ ] **Schema tab**: All four buttons (Paste Object, Copy Object, Paste Schema, Copy Schema) exist and are wired. ✅
-- [ ] **Utils tab — Timestamp**: Paste from clipboard → timestamp input, "Now" button, Copy output. ✅
-- [ ] **Utils tab — UUID/Token**: Inline Copy buttons on each field. ✅
-- [ ] **Utils tab — Units**: Plain `<input>` fields, no clipboard buttons needed. ✅
+- [x] **JSON tab (new)**: Paste on left auto-applies conversion. Copy on left and right. Right pane has "← Copy to left". Verify all three initial functions (JSON→JSON5, JSON5→JSON, Parse Graylog) work correctly.
+- [x] **Text tab**: Left pane has Paste+Copy. Right pane has Copy only (output-only by design). Dead `pasteOutputStringButton` listener removed in Phase 1.
+- [x] **Schema tab**: All four buttons (Paste Object, Copy Object, Paste Schema, Copy Schema) exist and are wired. ✅
+- [x] **Utils tab — Timestamp**: Paste from clipboard → timestamp input, "Now" button, Copy output. ✅
+- [x] **Utils tab — UUID/Token**: Inline Copy buttons on each field. ✅
+- [x] **Utils tab — Units**: Plain `<input>` fields, no clipboard buttons needed. ✅
 - [ ] **After Phases 4–5 (new tools)**: Verify every new tool pane follows the pattern above.
 
 ---
