@@ -16,14 +16,13 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/moment-timezone/0.5.34/moment-timezone-with-data.min.js"></script>
   <script src="https://unpkg.com/json5@2/dist/index.min.js"></script>
   <script src="https://unpkg.com/monaco-editor@latest/min/vs/loader.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/uuid@8.3.2/dist/umd/uuidv4.min.js"></script>
 </head>
 
 <body>
   <div class="container">
     <div class="tabs">
-      <button class="tab-button active" onclick="openTab(event, 'tools')">Tools</button>
-      <button class="tab-button" onclick="openTab(event, 'utils')"><i class="fas fa-tools"></i> Utils</button>
+      <button class="tab-button active" data-tab="tools" onclick="openTab(event, 'tools')">Tools</button>
+      <button class="tab-button" data-tab="utils" onclick="openTab(event, 'utils')"><i class="fas fa-tools"></i> Utils</button>
     </div>
 
     <!-------------------------------------------------------------->

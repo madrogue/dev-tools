@@ -7,34 +7,18 @@ let timestampFormat = document.getElementById("timestampFormat");
 let uuidWithDashes = document.getElementById("uuidWithDashes");
 let uuidWithoutDashes = document.getElementById("uuidWithoutDashes");
 
-require.config({
-  paths: { vs: "https://unpkg.com/monaco-editor@latest/min/vs" }
-});
-window.MonacoEnvironment = { getWorkerUrl: () => proxy };
-
-let proxy = URL.createObjectURL(
+const proxy = URL.createObjectURL(
   new Blob(
-    [
-      `
-	self.MonacoEnvironment = {
-		baseUrl: 'https://unpkg.com/monaco-editor@latest/min/'
-	};
-	importScripts('https://unpkg.com/monaco-editor@latest/min/vs/base/worker/workerMain.js');
-`
-    ],
+    [`
+      self.MonacoEnvironment = { baseUrl: 'https://unpkg.com/monaco-editor@latest/min/' };
+      importScripts('https://unpkg.com/monaco-editor@latest/min/vs/base/worker/workerMain.js');
+    `],
     { type: "text/javascript" }
   )
 );
 
-// require.config({ paths: { 'vs': 'https://unpkg.com/monaco-editor@0.8.3/min/vs' } });
-// window.MonacoEnvironment = { getWorkerUrl: () => proxy };
-
-// let proxy = URL.createObjectURL(new Blob([`
-// 	self.MonacoEnvironment = {
-// 		baseUrl: 'https://unpkg.com/monaco-editor@0.8.3/min/'
-// 	};
-// 	importScripts('https://unpkg.com/monaco-editor@0.8.3/min/vs/base/worker/workerMain.js');
-// `], { type: 'text/javascript' }));
+require.config({ paths: { vs: "https://unpkg.com/monaco-editor@latest/min/vs" } });
+window.MonacoEnvironment = { getWorkerUrl: () => proxy };
 
 require(["vs/editor/editor.main"], function () {
   //#region Register JSON5 language for monaco editor
@@ -78,8 +62,7 @@ require(["vs/editor/editor.main"], function () {
   onDOMContentLoaded();
 });
 
-// Initialize the selected tab and editor values after monaco editor is loaded
-document.addEventListener("DOMContentLoaded", onDOMContentLoaded);
+// Initialization runs inside Monaco's require() callback — no separate DOMContentLoaded listener needed.
 
 function onDOMContentLoaded() {
   console.log(`DOM content loaded`);
@@ -161,9 +144,9 @@ function detectAndUpdateBadge(badgeId, text) {
   }
 }
 
-function initializeEditor(editorId, language, value) {
+function initializeEditor(editorId, language) {
   const editor = monaco.editor.create(document.getElementById(editorId), {
-    value: value,
+    value: '',
     language: language,
     theme: "vs-dark",
     folding: true
@@ -204,6 +187,9 @@ function openTab(evt, tabName) {
   document.getElementById(tabName).classList.add("active");
   if (evt) {
     evt.currentTarget.classList.add("active");
+  } else {
+    const btn = document.querySelector(`.tab-button[data-tab="${tabName}"]`);
+    if (btn) btn.classList.add("active");
   }
 
   // Initialize editors for the tools tab (lazy, only on first visit)
@@ -387,11 +373,13 @@ function execute_applyTool() {
 function execute_convertJsonToJson5() {
   const result = convertJsonToJson5(leftEditor.getValue());
   if (result !== null) rightEditor.setValue(result);
+  else showValidationResult('Invalid JSON — could not convert.', 'error');
 }
 
 function execute_convertJson5ToJson() {
   const result = convertJson5ToJson(leftEditor.getValue());
   if (result !== null) rightEditor.setValue(result);
+  else showValidationResult('Invalid JSON5 — could not convert.', 'error');
 }
 
 function execute_copyRightToLeft() {
@@ -399,9 +387,11 @@ function execute_copyRightToLeft() {
   if (fn === 'jsonToJson5') {
     const result = convertJson5ToJson(rightEditor.getValue());
     if (result !== null) leftEditor.setValue(result);
+    else showValidationResult('Invalid JSON5 — could not convert.', 'error');
   } else if (fn === 'json5ToJson') {
     const result = convertJsonToJson5(rightEditor.getValue());
     if (result !== null) leftEditor.setValue(result);
+    else showValidationResult('Invalid JSON — could not convert.', 'error');
   } else {
     leftEditor.setValue(rightEditor.getValue());
   }
@@ -676,9 +666,8 @@ function execute_convertDatePartsToTimestamp() {
   document.getElementById('timestampDisplayRelative').textContent = moment(timestamp).fromNow();
 }
 
-async function execute_refreshUuid() {
-  const uuidValue = await generateUUID();
-
+function execute_refreshUuid() {
+  const uuidValue = generateUUID();
   document.getElementById("uuidWithDashes").value = uuidValue.uuid;
   document.getElementById("uuidWithoutDashes").value = uuidValue.uuidWithoutDashes;
 }
