@@ -46,7 +46,7 @@
 }
 
 .utils-tab-button {
-  padding: 6px 16px;
+  padding: 9px 16px;
   border-radius: 4px 4px 0 0;
   background: var(--bg-2);
   border: 1px solid var(--border);
@@ -57,7 +57,7 @@
   font-size: 0.75rem;
   text-transform: uppercase;
   letter-spacing: 0.1em;
-  flex: 0 1 auto;
+  flex: 1;
   margin-bottom: -1px;
   transition: background 120ms ease, color 120ms ease;
 }
@@ -238,7 +238,7 @@ textarea:focus {
 
 button {
   flex: 0 1 auto;
-  padding: 7px 14px;
+  padding: 9px 14px;
   border-radius: 5px;
   background-color: var(--bg-2);
   border: 1px solid var(--border);
@@ -264,6 +264,12 @@ button:hover {
   gap: 8px;
   width: 100%;
   justify-content: center;
+}
+
+.button-group > button,
+.button-group > select {
+  flex: 1;
+  padding: 10px 14px;
 }
 
 /****************************************************
@@ -463,16 +469,6 @@ table > tr > td:first-child:not(.ignored) {
   font-size: 0.85rem;
 }
 
-/****************************************************
- * Utils panel max-width
- ****************************************************/
-#utils {
-  max-width: 960px;
-}
-
-.utils-panel.active {
-  max-width: 100%;
-}
 
 /****************************************************
  * Tool extra controls (Regex, JSONPath) — animated show/hide
