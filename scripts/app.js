@@ -360,10 +360,6 @@ document.getElementById('pasteInputStringButton').addEventListener('click', func
 document.getElementById('copyOutputStringButton').addEventListener('click', function () {
   copyFromEditor(stringOutputEditor);
 });
-
-document.getElementById('pasteOutputStringButton').addEventListener('click', function () {
-  pasteToEditor(stringOutputEditor);
-});
 //#endregion
 
 //#region Timestamp copy/paste buttons
@@ -388,7 +384,7 @@ document.getElementById('sendGraylogMsgToJsonButton').addEventListener('click', 
   // Switch to the JSON/JSON5 tab
   openTab(null, 'jsonToJson5');
   // Paste the parsed message into the JSON editor
-  if (typeof jsonInputEditor !== "undefined") {
+  if (jsonInputEditor) {
     jsonInputEditor.setValue(parsedMessage);
     execute_convertJsonToJson5();
   }
@@ -758,39 +754,10 @@ function execute_generateFormSchema() {
 }
 
 function execute_validateObjectAgainstSchema() {
-  try {
-    const obj = JSON.parse(jsonSchemaObjectEditor.getValue());
-    const schema = objectToJsonSchema(obj);
-    jsonSchemaEditor.setValue(JSON.stringify(schema, null, 2));
-    showValidationResult('Schema generated!', 'success');
-  } catch (e) {
-    showValidationResult('Invalid object: ' + e.message, 'error');
+  if (!window.Ajv7) {
+    showValidationResult('AJV library not loaded — validation unavailable.', 'error');
+    return;
   }
-}
-
-function execute_generateFormSchema() {
-  try {
-    let input = jsonSchemaObjectEditor.getValue();
-    let obj = JSON.parse(input);
-    let jsonSchema;
-
-    // Check if input is already a JSON schema (has 'type' and 'properties')
-    if (obj.type === 'object' && obj.properties) {
-      jsonSchema = obj;
-    } else {
-      // Generate JSON schema from object
-      jsonSchema = objectToJsonSchema(obj);
-    }
-
-    const formSchema = generateFormSchema(jsonSchema);
-    jsonSchemaEditor.setValue(JSON.stringify(formSchema, null, 2));
-    showValidationResult('Form schema generated!', 'success');
-  } catch (e) {
-    showValidationResult('Generation error: ' + e.message, 'error');
-  }
-}
-
-function execute_validateObjectAgainstSchema() {
   try {
     const obj = JSON.parse(jsonSchemaObjectEditor.getValue());
     const schema = JSON.parse(jsonSchemaEditor.getValue());
@@ -826,6 +793,10 @@ function execute_generateDalMap() {
 }
 
 function execute_generateObjectFromSchema() {
+  if (!window.jsf) {
+    showValidationResult('json-schema-faker not loaded — generation unavailable.', 'error');
+    return;
+  }
   try {
     const schema = JSON.parse(jsonSchemaEditor.getValue());
     const obj = window.jsf.generate(schema);
