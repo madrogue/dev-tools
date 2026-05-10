@@ -2114,3 +2114,18 @@ function objectToJsonSchema(obj) {
     return { type: typeof obj };
   }
 }
+
+/****************************************************
+ * Help modal
+ ****************************************************/
+function openHelp() {
+  document.getElementById('helpBackdrop').classList.add('open');
+}
+
+function closeHelp() {
+  document.getElementById('helpBackdrop').classList.remove('open');
+}
+
+document.addEventListener('keydown', function (e) {
+  if (e.key === 'Escape') closeHelp();
+});

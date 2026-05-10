@@ -27,6 +27,7 @@
     <div class="tabs">
       <button class="tab-button active" data-tab="tools" onclick="openTab(event, 'tools')">Tools</button>
       <button class="tab-button" data-tab="utils" onclick="openTab(event, 'utils')"><i class="fas fa-tools"></i> Utils</button>
+      <button class="help-button" onclick="openHelp()" title="Tool Reference"><i class="fas fa-question-circle"></i></button>
     </div>
 
     <!-------------------------------------------------------------->
@@ -462,6 +463,327 @@
       </div><!-- /utils-panel-web -->
 
     </div>
+
+    <!-- ============================================================ -->
+    <!-- Help Modal                                                   -->
+    <!-- ============================================================ -->
+    <div id="helpBackdrop" onclick="if(event.target===this)closeHelp()">
+      <div id="helpModal">
+
+        <div class="help-header">
+          <span class="help-title"><i class="fas fa-question-circle"></i> Tool Reference</span>
+          <button class="help-close" onclick="closeHelp()" title="Close">&times;</button>
+        </div>
+
+        <div class="help-body">
+
+          <!-- ─── TOOLS TAB ─────────────────────────────────────── -->
+          <div class="help-tab-section">
+            <div class="help-tab-title">Tools tab</div>
+
+            <div class="help-group-title">JSON</div>
+
+            <div class="help-tool">
+              <div class="help-tool-name">JSON → JSON5</div>
+              <div class="help-tool-desc">Converts strict JSON to JSON5 — adds trailing commas, allows unquoted keys and comments.</div>
+              <div class="help-tool-io"><span class="help-badge help-badge-in">IN</span> JSON &thinsp;→&thinsp; <span class="help-badge help-badge-out">OUT</span> JSON5</div>
+            </div>
+
+            <div class="help-tool">
+              <div class="help-tool-name">JSON5 → JSON</div>
+              <div class="help-tool-desc">Parses JSON5 (with comments, trailing commas, etc.) and converts it to strict JSON.</div>
+              <div class="help-tool-io"><span class="help-badge help-badge-in">IN</span> JSON5 &thinsp;→&thinsp; <span class="help-badge help-badge-out">OUT</span> JSON</div>
+            </div>
+
+            <div class="help-tool">
+              <div class="help-tool-name">Parse Graylog</div>
+              <div class="help-tool-desc">Extracts and reformats Graylog log lines into a clean, structured JSON object.</div>
+              <div class="help-tool-io"><span class="help-badge help-badge-in">IN</span> Graylog log text &thinsp;→&thinsp; <span class="help-badge help-badge-out">OUT</span> JSON</div>
+            </div>
+
+            <div class="help-tool">
+              <div class="help-tool-name">Analyze JSON</div>
+              <div class="help-tool-desc">Inspects a JSON value and reports its structure: key count, nesting depth, value types, and array lengths.</div>
+              <div class="help-tool-io"><span class="help-badge help-badge-in">IN</span> JSON &thinsp;→&thinsp; <span class="help-badge help-badge-out">OUT</span> Analysis table</div>
+            </div>
+
+            <div class="help-tool">
+              <div class="help-tool-name">JSON Diff <span class="help-both-panes">uses both panes</span></div>
+              <div class="help-tool-desc">Compares two JSON objects and highlights keys that are added, removed, or changed.</div>
+              <div class="help-tool-io"><span class="help-badge help-badge-in">IN</span> JSON (left) + JSON (right) &thinsp;→&thinsp; <span class="help-badge help-badge-out">OUT</span> Diff in right pane</div>
+            </div>
+
+            <div class="help-tool">
+              <div class="help-tool-name">JSON Path Explorer</div>
+              <div class="help-tool-desc">Evaluates a JSONPath expression against a JSON document and returns all matching values.</div>
+              <div class="help-tool-io"><span class="help-badge help-badge-in">IN</span> JSON + JSONPath expression &thinsp;→&thinsp; <span class="help-badge help-badge-out">OUT</span> Matched values</div>
+            </div>
+
+            <div class="help-group-title">Key Transform</div>
+
+            <div class="help-tool">
+              <div class="help-tool-name">Flat → Wrapped</div>
+              <div class="help-tool-desc">Wraps every value in <code>{v: …}</code> — the keyed-value format used by some data stores.</div>
+              <div class="help-tool-io"><span class="help-badge help-badge-in">IN</span> Flat JSON &thinsp;→&thinsp; <span class="help-badge help-badge-out">OUT</span> <code>{key: {v: value}}</code></div>
+            </div>
+
+            <div class="help-tool">
+              <div class="help-tool-name">Wrapped → Flat</div>
+              <div class="help-tool-desc">Unwraps <code>{v: …}</code> or <code>{value: …}</code> structures back to plain key-value pairs.</div>
+              <div class="help-tool-io"><span class="help-badge help-badge-in">IN</span> Wrapped JSON &thinsp;→&thinsp; <span class="help-badge help-badge-out">OUT</span> Flat JSON</div>
+            </div>
+
+            <div class="help-tool">
+              <div class="help-tool-name">Rewrap</div>
+              <div class="help-tool-desc">Swaps the inner key name between <code>v</code> and <code>value</code> throughout the object.</div>
+              <div class="help-tool-io"><span class="help-badge help-badge-in">IN</span> Wrapped JSON &thinsp;→&thinsp; <span class="help-badge help-badge-out">OUT</span> Rewrapped JSON</div>
+            </div>
+
+            <div class="help-group-title">Text</div>
+
+            <div class="help-tool">
+              <div class="help-tool-name">Strip Newlines</div>
+              <div class="help-tool-desc">Removes all line breaks, producing a single continuous string.</div>
+              <div class="help-tool-io"><span class="help-badge help-badge-in">IN</span> Multi-line text &thinsp;→&thinsp; <span class="help-badge help-badge-out">OUT</span> Single-line string</div>
+            </div>
+
+            <div class="help-tool">
+              <div class="help-tool-name">Newlines → \n</div>
+              <div class="help-tool-desc">Converts real newline characters to literal <code>\n</code> escape sequences.</div>
+              <div class="help-tool-io"><span class="help-badge help-badge-in">IN</span> Multi-line text &thinsp;→&thinsp; <span class="help-badge help-badge-out">OUT</span> Escaped string</div>
+            </div>
+
+            <div class="help-tool">
+              <div class="help-tool-name">\n → Newlines</div>
+              <div class="help-tool-desc">Converts literal <code>\n</code> escape sequences back to real line breaks.</div>
+              <div class="help-tool-io"><span class="help-badge help-badge-in">IN</span> Escaped string &thinsp;→&thinsp; <span class="help-badge help-badge-out">OUT</span> Multi-line text</div>
+            </div>
+
+            <div class="help-tool">
+              <div class="help-tool-name">Quote / Unquote / Toggle Quotes</div>
+              <div class="help-tool-desc">Quote wraps text in double quotes (escaping inner quotes). Unquote strips them. Toggle switches between single and double.</div>
+              <div class="help-tool-io"><span class="help-badge help-badge-in">IN</span> Text or quoted string &thinsp;→&thinsp; <span class="help-badge help-badge-out">OUT</span> Modified string</div>
+            </div>
+
+            <div class="help-tool">
+              <div class="help-tool-name">Parse Stringified JSON</div>
+              <div class="help-tool-desc">Parses a JSON value that has been double-encoded (stringified inside a string). Shows the error location if parsing fails, on both the original and unescaped strings.</div>
+              <div class="help-tool-io"><span class="help-badge help-badge-in">IN</span> Stringified JSON &thinsp;→&thinsp; <span class="help-badge help-badge-out">OUT</span> Parsed JSON or annotated error</div>
+            </div>
+
+            <div class="help-tool">
+              <div class="help-tool-name">Base64 Encode / Decode</div>
+              <div class="help-tool-desc">Encode converts plain text to a Base64 string. Decode reverses it.</div>
+              <div class="help-tool-io"><span class="help-badge help-badge-in">IN</span> Text or Base64 &thinsp;→&thinsp; <span class="help-badge help-badge-out">OUT</span> Base64 or plain text</div>
+            </div>
+
+            <div class="help-tool">
+              <div class="help-tool-name">JWT Decode</div>
+              <div class="help-tool-desc">Splits and decodes a JWT's header and payload. Does not verify the signature.</div>
+              <div class="help-tool-io"><span class="help-badge help-badge-in">IN</span> JWT token &thinsp;→&thinsp; <span class="help-badge help-badge-out">OUT</span> JSON with header + payload + signature</div>
+            </div>
+
+            <div class="help-tool">
+              <div class="help-tool-name">Markdown Preview</div>
+              <div class="help-tool-desc">Renders Markdown to a styled HTML preview in the right pane in real time when you click Apply.</div>
+              <div class="help-tool-io"><span class="help-badge help-badge-in">IN</span> Markdown text &thinsp;→&thinsp; <span class="help-badge help-badge-out">OUT</span> Rendered HTML preview</div>
+            </div>
+
+            <div class="help-group-title">Regex</div>
+
+            <div class="help-tool">
+              <div class="help-tool-name">Regex Tester</div>
+              <div class="help-tool-desc">Tests a regex pattern against text. Enter the pattern and optional flags in the controls that appear below the toolbar. Reports each match with its index and captured groups.</div>
+              <div class="help-tool-io"><span class="help-badge help-badge-in">IN</span> Text + pattern + flags &thinsp;→&thinsp; <span class="help-badge help-badge-out">OUT</span> Match list</div>
+            </div>
+
+            <div class="help-group-title">Data</div>
+
+            <div class="help-tool">
+              <div class="help-tool-name">CSV → JSON</div>
+              <div class="help-tool-desc">Converts CSV to a JSON array of objects, using the first row as column headers.</div>
+              <div class="help-tool-io"><span class="help-badge help-badge-in">IN</span> CSV &thinsp;→&thinsp; <span class="help-badge help-badge-out">OUT</span> JSON array</div>
+            </div>
+
+            <div class="help-tool">
+              <div class="help-tool-name">JSON → CSV</div>
+              <div class="help-tool-desc">Converts a JSON array of objects to CSV with a header row derived from the object keys.</div>
+              <div class="help-tool-io"><span class="help-badge help-badge-in">IN</span> JSON array &thinsp;→&thinsp; <span class="help-badge help-badge-out">OUT</span> CSV</div>
+            </div>
+
+            <div class="help-group-title">YAML</div>
+
+            <div class="help-tool">
+              <div class="help-tool-name">YAML → JSON</div>
+              <div class="help-tool-desc">Parses YAML and converts it to formatted JSON.</div>
+              <div class="help-tool-io"><span class="help-badge help-badge-in">IN</span> YAML &thinsp;→&thinsp; <span class="help-badge help-badge-out">OUT</span> JSON</div>
+            </div>
+
+            <div class="help-tool">
+              <div class="help-tool-name">JSON → YAML</div>
+              <div class="help-tool-desc">Converts JSON to YAML format.</div>
+              <div class="help-tool-io"><span class="help-badge help-badge-in">IN</span> JSON &thinsp;→&thinsp; <span class="help-badge help-badge-out">OUT</span> YAML</div>
+            </div>
+
+            <div class="help-group-title">Schema</div>
+
+            <div class="help-tool">
+              <div class="help-tool-name">Generate JSON Schema</div>
+              <div class="help-tool-desc">Infers a JSON Schema by inspecting the structure and types of a sample JSON object.</div>
+              <div class="help-tool-io"><span class="help-badge help-badge-in">IN</span> JSON object &thinsp;→&thinsp; <span class="help-badge help-badge-out">OUT</span> JSON Schema</div>
+            </div>
+
+            <div class="help-tool">
+              <div class="help-tool-name">Generate Form Schema</div>
+              <div class="help-tool-desc">Produces field-level form schema definitions (label, type, required) from a JSON object's shape.</div>
+              <div class="help-tool-io"><span class="help-badge help-badge-in">IN</span> JSON object &thinsp;→&thinsp; <span class="help-badge help-badge-out">OUT</span> Form schema JSON</div>
+            </div>
+
+            <div class="help-tool">
+              <div class="help-tool-name">Generate DAL Map</div>
+              <div class="help-tool-desc">Builds a DAL (Data Access Layer) subscription map from the shape of a JSON object.</div>
+              <div class="help-tool-io"><span class="help-badge help-badge-in">IN</span> JSON object &thinsp;→&thinsp; <span class="help-badge help-badge-out">OUT</span> DAL map JSON</div>
+            </div>
+
+            <div class="help-tool">
+              <div class="help-tool-name">Flatten Nested Schema</div>
+              <div class="help-tool-desc">Collapses nested <code>$defs</code> / <code>definitions</code> references into a single-level schema.</div>
+              <div class="help-tool-io"><span class="help-badge help-badge-in">IN</span> Nested JSON Schema &thinsp;→&thinsp; <span class="help-badge help-badge-out">OUT</span> Flat JSON Schema</div>
+            </div>
+
+            <div class="help-tool">
+              <div class="help-tool-name">Merge Schemas <span class="help-both-panes">uses both panes</span></div>
+              <div class="help-tool-desc">Deep-merges two JSON Schemas, combining properties and required arrays.</div>
+              <div class="help-tool-io"><span class="help-badge help-badge-in">IN</span> Schema (left) + schema (right) &thinsp;→&thinsp; <span class="help-badge help-badge-out">OUT</span> Merged schema</div>
+            </div>
+
+            <div class="help-tool">
+              <div class="help-tool-name">Schema Diff <span class="help-both-panes">uses both panes</span></div>
+              <div class="help-tool-desc">Shows fields that were added, removed, or changed between two JSON Schemas.</div>
+              <div class="help-tool-io"><span class="help-badge help-badge-in">IN</span> Schema (left) + schema (right) &thinsp;→&thinsp; <span class="help-badge help-badge-out">OUT</span> Diff report</div>
+            </div>
+
+            <div class="help-tool">
+              <div class="help-tool-name">Generate TypeScript Interfaces</div>
+              <div class="help-tool-desc">Produces TypeScript interface declarations from a JSON Schema, including nested types.</div>
+              <div class="help-tool-io"><span class="help-badge help-badge-in">IN</span> JSON Schema &thinsp;→&thinsp; <span class="help-badge help-badge-out">OUT</span> TypeScript <code>.ts</code></div>
+            </div>
+
+            <div class="help-tool">
+              <div class="help-tool-name">Generate OpenAPI Schema</div>
+              <div class="help-tool-desc">Wraps a JSON Schema as an OpenAPI 3.0 <code>components/schemas</code> entry.</div>
+              <div class="help-tool-io"><span class="help-badge help-badge-in">IN</span> JSON Schema &thinsp;→&thinsp; <span class="help-badge help-badge-out">OUT</span> OpenAPI YAML</div>
+            </div>
+
+            <div class="help-tool">
+              <div class="help-tool-name">Generate Mock Data</div>
+              <div class="help-tool-desc">Creates realistic sample JSON data that matches the schema's field names and types.</div>
+              <div class="help-tool-io"><span class="help-badge help-badge-in">IN</span> JSON Schema &thinsp;→&thinsp; <span class="help-badge help-badge-out">OUT</span> JSON mock object</div>
+            </div>
+
+            <div class="help-tool">
+              <div class="help-tool-name">Generate CSV Template</div>
+              <div class="help-tool-desc">Outputs a CSV header row from the schema's top-level property names.</div>
+              <div class="help-tool-io"><span class="help-badge help-badge-in">IN</span> JSON Schema &thinsp;→&thinsp; <span class="help-badge help-badge-out">OUT</span> CSV header row</div>
+            </div>
+
+            <div class="help-tool">
+              <div class="help-tool-name">Simplify Schema</div>
+              <div class="help-tool-desc">Strips verbose metadata (<code>$schema</code>, <code>$id</code>, descriptions, examples) for a leaner schema.</div>
+              <div class="help-tool-io"><span class="help-badge help-badge-in">IN</span> JSON Schema &thinsp;→&thinsp; <span class="help-badge help-badge-out">OUT</span> Simplified JSON Schema</div>
+            </div>
+
+            <div class="help-tool">
+              <div class="help-tool-name">Generate Table Component</div>
+              <div class="help-tool-desc">Produces a column-definition config for a data table component, derived from schema properties.</div>
+              <div class="help-tool-io"><span class="help-badge help-badge-in">IN</span> JSON Schema &thinsp;→&thinsp; <span class="help-badge help-badge-out">OUT</span> Table component config</div>
+            </div>
+
+            <div class="help-tool">
+              <div class="help-tool-name">Validate Object <span class="help-both-panes">uses both panes</span></div>
+              <div class="help-tool-desc">Validates a JSON object against a JSON Schema. Reports pass/fail and lists all validation errors.</div>
+              <div class="help-tool-io"><span class="help-badge help-badge-in">IN</span> JSON object (left) + JSON Schema (right) &thinsp;→&thinsp; <span class="help-badge help-badge-out">OUT</span> Validation result</div>
+            </div>
+
+            <div class="help-tool">
+              <div class="help-tool-name">Generate Object from Schema</div>
+              <div class="help-tool-desc">Builds a minimal skeleton JSON object from a schema's required properties. Result goes to the left pane.</div>
+              <div class="help-tool-io"><span class="help-badge help-badge-in">IN</span> JSON Schema (right pane) &thinsp;→&thinsp; <span class="help-badge help-badge-out">OUT</span> JSON object (left pane)</div>
+            </div>
+
+          </div><!-- /tools section -->
+
+          <!-- ─── UTILS TAB ─────────────────────────────────────── -->
+          <div class="help-tab-section">
+            <div class="help-tab-title">Utils tab</div>
+
+            <div class="help-group-title"><i class="fas fa-clock"></i> Time</div>
+
+            <div class="help-tool">
+              <div class="help-tool-name">Timestamp Converter</div>
+              <div class="help-tool-desc">Converts Unix timestamps (seconds or milliseconds) to human-readable dates across multiple timezones. Click <strong>Now</strong> to paste the current time. Change the timezone or format to instantly re-render.</div>
+              <div class="help-tool-io"><span class="help-badge help-badge-in">IN</span> Unix timestamp &thinsp;→&thinsp; <span class="help-badge help-badge-out">OUT</span> Formatted date in selected timezone</div>
+            </div>
+
+            <div class="help-tool">
+              <div class="help-tool-name">Cron Parser</div>
+              <div class="help-tool-desc">Parses a 5-field cron expression (<code>min hr dom mon dow</code>) into a plain-English description and lists the next 10 scheduled fire times.</div>
+              <div class="help-tool-io"><span class="help-badge help-badge-in">IN</span> Cron expression &thinsp;→&thinsp; <span class="help-badge help-badge-out">OUT</span> Description + next 10 fire times</div>
+            </div>
+
+            <div class="help-group-title"><i class="fas fa-key"></i> Generate</div>
+
+            <div class="help-tool">
+              <div class="help-tool-name">UUID Generator</div>
+              <div class="help-tool-desc">Generates a cryptographically random UUID v4. Click either format to copy it. Click <strong>New UUID</strong> to generate another.</div>
+              <div class="help-tool-io"><span class="help-badge help-badge-out">OUT</span> UUID with dashes &amp; without dashes</div>
+            </div>
+
+            <div class="help-tool">
+              <div class="help-tool-name">Token Generator</div>
+              <div class="help-tool-desc">Generates a cryptographically random token of a configurable length. Choose which character sets to include: lowercase, uppercase, numbers, and/or symbols.</div>
+              <div class="help-tool-io"><span class="help-badge help-badge-out">OUT</span> Random token string</div>
+            </div>
+
+            <div class="help-group-title"><i class="fas fa-exchange-alt"></i> Convert</div>
+
+            <div class="help-tool">
+              <div class="help-tool-name">Temperature</div>
+              <div class="help-tool-desc">Converts between Celsius and Fahrenheit. Enter a value in either field and press the arrow button pointing toward the target unit.</div>
+              <div class="help-tool-io"><span class="help-badge help-badge-in">IN</span> °C or °F &thinsp;→&thinsp; <span class="help-badge help-badge-out">OUT</span> °F or °C</div>
+            </div>
+
+            <div class="help-tool">
+              <div class="help-tool-name">Color Converter</div>
+              <div class="help-tool-desc">Converts colors between HEX, RGB, and HSL formats. Enter a value in any field and the other two update instantly, along with a live color swatch.</div>
+              <div class="help-tool-io"><span class="help-badge help-badge-in">IN</span> HEX, RGB, or HSL &thinsp;→&thinsp; <span class="help-badge help-badge-out">OUT</span> The other two formats + swatch</div>
+            </div>
+
+            <div class="help-tool">
+              <div class="help-tool-name">Base Converter</div>
+              <div class="help-tool-desc">Converts numbers between decimal, binary, octal, and hexadecimal. Edit any field to update the rest.</div>
+              <div class="help-tool-io"><span class="help-badge help-badge-in">IN</span> Any base &thinsp;→&thinsp; <span class="help-badge help-badge-out">OUT</span> All four bases</div>
+            </div>
+
+            <div class="help-group-title"><i class="fas fa-link"></i> Web</div>
+
+            <div class="help-tool">
+              <div class="help-tool-name">URL Encoder / Decoder</div>
+              <div class="help-tool-desc">Encodes special characters for safe use in a URL, or decodes an encoded URL back to readable text.</div>
+              <div class="help-tool-io"><span class="help-badge help-badge-in">IN</span> Plain text or encoded URL &thinsp;→&thinsp; <span class="help-badge help-badge-out">OUT</span> Encoded or decoded string</div>
+            </div>
+
+            <div class="help-tool">
+              <div class="help-tool-name">URL Builder</div>
+              <div class="help-tool-desc">Assembles a complete URL from its parts: protocol, host, port, path, fragment, and query parameters (one <code>key=value</code> per line).</div>
+              <div class="help-tool-io"><span class="help-badge help-badge-in">IN</span> URL parts &thinsp;→&thinsp; <span class="help-badge help-badge-out">OUT</span> Complete URL</div>
+            </div>
+
+          </div><!-- /utils section -->
+
+        </div><!-- /help-body -->
+      </div><!-- /helpModal -->
+    </div><!-- /helpBackdrop -->
 
     <script src="scripts/keyTransform.js"></script>
     <script src="scripts/jsonToJson5.js"></script>
