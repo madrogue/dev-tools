@@ -363,8 +363,7 @@ function execute_onToolChange() {
   const [leftLang, rightLang] = toolLanguageModes[tool] || ['json', 'json'];
   monaco.editor.setModelLanguage(leftEditor.getModel(), leftLang);
   monaco.editor.setModelLanguage(rightEditor.getModel(), rightLang);
-  document.getElementById('validationResult').textContent = '';
-  document.getElementById('validationResult').className = 'validation-result';
+  clearValidationResult();
   document.getElementById('regexControls').classList.toggle('visible', tool === 'regexTest');
   document.getElementById('jsonPathControls').classList.toggle('visible', tool === 'jsonPathExplorer');
   document.getElementById('jwtEncodeControls').classList.toggle('visible', tool === 'jwtEncode');
@@ -974,10 +973,22 @@ function execute_generateObjectFromSchema() {
   }
 }
 
+let _validationTimer = null;
+
 function showValidationResult(msg, type) {
   const el = document.getElementById('validationResult');
-  el.textContent = msg;
-  el.className = 'validation-result ' + type;
+  document.getElementById('validationText').textContent = msg;
+  el.className = 'validation-result ' + type + ' visible';
+  if (_validationTimer) { clearTimeout(_validationTimer); _validationTimer = null; }
+  if (type === 'success') {
+    _validationTimer = setTimeout(clearValidationResult, 5000);
+  }
+}
+
+function clearValidationResult() {
+  const el = document.getElementById('validationResult');
+  el.classList.remove('visible');
+  if (_validationTimer) { clearTimeout(_validationTimer); _validationTimer = null; }
 }
 
 // Generate a form schema from a JSON schema

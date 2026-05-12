@@ -140,7 +140,6 @@
           <div id="rightPreviewPanel" class="code-editor" style="display:none; overflow:auto; padding:10px;"></div>
         </div>
       </div>
-      <div class="validation-result" id="validationResult"></div>
     </div>
 
     <!-------------------------------------------------------------->
@@ -817,6 +816,11 @@
         </div><!-- /help-body -->
       </div><!-- /helpModal -->
     </div><!-- /helpBackdrop -->
+
+    <div id="validationResult" class="validation-result" role="status">
+      <span id="validationText"></span>
+      <button class="validation-close" onclick="clearValidationResult()" title="Dismiss">&times;</button>
+    </div>
 
     <script src="scripts/keyTransform.js"></script>
     <script src="scripts/jsonToJson5.js"></script>
