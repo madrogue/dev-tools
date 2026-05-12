@@ -46,6 +46,33 @@ function toggleQuotes(str) {
     .replace(/'/g, '"');
 }
 
+function htmlEncode(str) {
+  return str
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#039;');
+}
+
+function htmlDecode(str) {
+  const el = document.createElement('textarea');
+  el.innerHTML = str;
+  return el.value;
+}
+
+function urlEncode(str) {
+  return encodeURIComponent(str);
+}
+
+function urlDecode(str) {
+  try {
+    return decodeURIComponent(str);
+  } catch (e) {
+    return str;
+  }
+}
+
 function parseStringifiedJson(str) {
   // Trim whitespace
   let cleaned = str.trim();

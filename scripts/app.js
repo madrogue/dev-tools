@@ -343,6 +343,10 @@ const toolLanguageModes = {
   base64Encode:             ['plaintext', 'plaintext'],
   base64Decode:             ['plaintext', 'plaintext'],
   jwtDecode:                ['plaintext', 'json'],
+  htmlEncode:               ['plaintext', 'plaintext'],
+  htmlDecode:               ['plaintext', 'plaintext'],
+  urlEncode:                ['plaintext', 'plaintext'],
+  urlDecode:                ['plaintext', 'plaintext'],
   csvToJson:                ['plaintext', 'json'],
   jsonToCsv:                ['json',      'plaintext'],
   yamlToJson:               ['plaintext', 'json'],
@@ -392,6 +396,10 @@ function execute_applyTool() {
     case 'base64Encode':           execute_base64Encode(); break;
     case 'base64Decode':           execute_base64Decode(); break;
     case 'jwtDecode':              execute_jwtDecode(); break;
+    case 'htmlEncode':             execute_applyStringManipulation(); break;
+    case 'htmlDecode':             execute_applyStringManipulation(); break;
+    case 'urlEncode':              execute_applyStringManipulation(); break;
+    case 'urlDecode':              execute_applyStringManipulation(); break;
     // Data group
     case 'csvToJson':              execute_csvToJson(); break;
     case 'jsonToCsv':              execute_jsonToCsv(); break;
@@ -657,6 +665,10 @@ function execute_applyStringManipulation() {
     unquoteString:        unquoteString,
     toggleQuotes:         toggleQuotes,
     parseStringifiedJson: parseStringifiedJson,
+    htmlEncode:           htmlEncode,
+    htmlDecode:           htmlDecode,
+    urlEncode:            urlEncode,
+    urlDecode:            urlDecode,
   };
   const output = fnMap[fn] ? fnMap[fn](input) : input;
   rightEditor.setValue(output);

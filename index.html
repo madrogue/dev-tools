@@ -62,6 +62,10 @@
                 <option value="base64Encode">Base64 Encode</option>
                 <option value="base64Decode">Base64 Decode</option>
                 <option value="jwtDecode">JWT Decode</option>
+                <option value="htmlEncode">HTML Encode</option>
+                <option value="htmlDecode">HTML Decode</option>
+                <option value="urlEncode">URL Encode</option>
+                <option value="urlDecode">URL Decode</option>
                 <option value="markdownPreview">Markdown Preview</option>
               </optgroup>
               <optgroup label="Regex">
@@ -581,6 +585,18 @@
               <div class="help-tool-name">JWT Decode</div>
               <div class="help-tool-desc">Splits and decodes a JWT's header and payload. Does not verify the signature.</div>
               <div class="help-tool-io"><span class="help-badge help-badge-in">IN</span> JWT token &thinsp;→&thinsp; <span class="help-badge help-badge-out">OUT</span> JSON with header + payload + signature</div>
+            </div>
+
+            <div class="help-tool">
+              <div class="help-tool-name">HTML Encode / Decode</div>
+              <div class="help-tool-desc">Encode converts special characters (<code>&lt; &gt; &amp; " '</code>) to HTML entities. Decode reverses it.</div>
+              <div class="help-tool-io"><span class="help-badge help-badge-in">IN</span> Plain text or HTML entities &thinsp;→&thinsp; <span class="help-badge help-badge-out">OUT</span> HTML entities or plain text</div>
+            </div>
+
+            <div class="help-tool">
+              <div class="help-tool-name">URL Encode / Decode</div>
+              <div class="help-tool-desc">Encode converts a string to percent-encoded form (e.g. <code>/**/ → %2F%2A%2A%2F</code>). Decode reverses it.</div>
+              <div class="help-tool-io"><span class="help-badge help-badge-in">IN</span> Plain text or percent-encoded string &thinsp;→&thinsp; <span class="help-badge help-badge-out">OUT</span> Percent-encoded or decoded text</div>
             </div>
 
             <div class="help-tool">
