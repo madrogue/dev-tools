@@ -343,6 +343,7 @@ const toolLanguageModes = {
   base64Encode:             ['plaintext', 'plaintext'],
   base64Decode:             ['plaintext', 'plaintext'],
   jwtDecode:                ['plaintext', 'json'],
+  jwtEncode:                ['json',      'plaintext'],
   htmlEncode:               ['plaintext', 'plaintext'],
   htmlDecode:               ['plaintext', 'plaintext'],
   urlEncode:                ['plaintext', 'plaintext'],
@@ -366,6 +367,7 @@ function execute_onToolChange() {
   document.getElementById('validationResult').className = 'validation-result';
   document.getElementById('regexControls').classList.toggle('visible', tool === 'regexTest');
   document.getElementById('jsonPathControls').classList.toggle('visible', tool === 'jsonPathExplorer');
+  document.getElementById('jwtEncodeControls').classList.toggle('visible', tool === 'jwtEncode');
   const isMarkdown = tool === 'markdownPreview';
   document.getElementById('rightEditor').style.display = isMarkdown ? 'none' : '';
   document.getElementById('rightPreviewPanel').style.display = isMarkdown ? '' : 'none';
@@ -396,6 +398,7 @@ function execute_applyTool() {
     case 'base64Encode':           execute_base64Encode(); break;
     case 'base64Decode':           execute_base64Decode(); break;
     case 'jwtDecode':              execute_jwtDecode(); break;
+    case 'jwtEncode':              execute_jwtEncode(); break;
     case 'htmlEncode':             execute_applyStringManipulation(); break;
     case 'htmlDecode':             execute_applyStringManipulation(); break;
     case 'urlEncode':              execute_applyStringManipulation(); break;
@@ -1335,6 +1338,43 @@ function execute_jwtDecode() {
     showValidationResult('JWT decoded!', 'success');
   } catch (e) {
     showValidationResult('Decode error: ' + e.message, 'error');
+  }
+}
+
+async function execute_jwtEncode() {
+  try {
+    const input = leftEditor.getValue().trim();
+    if (!input) { showValidationResult('No input.', 'error'); return; }
+    let payload;
+    try { payload = JSON5.parse(input); } catch(e) { showValidationResult('JSON parse error: ' + e.message, 'error'); return; }
+
+    const alg = document.getElementById('jwtEncodeAlg').value;
+    const secret = document.getElementById('jwtEncodeSecret').value;
+
+    const hashMap = { HS256: 'SHA-256', HS384: 'SHA-384', HS512: 'SHA-512' };
+    const header = { alg, typ: 'JWT' };
+
+    function b64url(str) {
+      return btoa(unescape(encodeURIComponent(str))).replace(/\+/g, '-').replace(/\//g, '_').replace(/=/g, '');
+    }
+    function b64urlBytes(bytes) {
+      let bin = '';
+      bytes.forEach(function(b) { bin += String.fromCharCode(b); });
+      return btoa(bin).replace(/\+/g, '-').replace(/\//g, '_').replace(/=/g, '');
+    }
+
+    const signingInput = b64url(JSON.stringify(header)) + '.' + b64url(JSON.stringify(payload));
+    const enc = new TextEncoder();
+    const cryptoKey = await crypto.subtle.importKey(
+      'raw', enc.encode(secret),
+      { name: 'HMAC', hash: hashMap[alg] },
+      false, ['sign']
+    );
+    const sig = await crypto.subtle.sign('HMAC', cryptoKey, enc.encode(signingInput));
+    rightEditor.setValue(signingInput + '.' + b64urlBytes(new Uint8Array(sig)));
+    showValidationResult('JWT encoded!', 'success');
+  } catch (e) {
+    showValidationResult('Encode error: ' + e.message, 'error');
   }
 }
 

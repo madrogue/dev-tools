@@ -474,7 +474,8 @@ table > tr > td:first-child:not(.ignored) {
  * Tool extra controls (Regex, JSONPath) — animated show/hide
  ****************************************************/
 #regexControls,
-#jsonPathControls {
+#jsonPathControls,
+#jwtEncodeControls {
   overflow: hidden;
   max-height: 0;
   opacity: 0;
@@ -482,7 +483,8 @@ table > tr > td:first-child:not(.ignored) {
 }
 
 #regexControls.visible,
-#jsonPathControls.visible {
+#jsonPathControls.visible,
+#jwtEncodeControls.visible {
   max-height: 60px;
   opacity: 1;
 }

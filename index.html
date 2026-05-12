@@ -62,6 +62,7 @@
                 <option value="base64Encode">Base64 Encode</option>
                 <option value="base64Decode">Base64 Decode</option>
                 <option value="jwtDecode">JWT Decode</option>
+                <option value="jwtEncode">JWT Encode</option>
                 <option value="htmlEncode">HTML Encode</option>
                 <option value="htmlDecode">HTML Decode</option>
                 <option value="urlEncode">URL Encode</option>
@@ -111,6 +112,16 @@
           <div id="jsonPathControls">
             <div class="button-group" style="margin-top:6px;">
               <input type="text" id="jsonPathExpression" placeholder="$.items[*].id" class="control-input" style="flex:1;">
+            </div>
+          </div>
+          <div id="jwtEncodeControls">
+            <div class="button-group" style="margin-top:6px;">
+              <select id="jwtEncodeAlg" class="control-input" style="flex:0 0 110px;">
+                <option value="HS256">HS256</option>
+                <option value="HS384">HS384</option>
+                <option value="HS512">HS512</option>
+              </select>
+              <input type="text" id="jwtEncodeSecret" placeholder="Secret key" class="control-input" style="flex:1;">
             </div>
           </div>
           <div class="editor-status"><span id="leftFormatBadge" class="format-badge"></span></div>
@@ -585,6 +596,12 @@
               <div class="help-tool-name">JWT Decode</div>
               <div class="help-tool-desc">Splits and decodes a JWT's header and payload. Does not verify the signature.</div>
               <div class="help-tool-io"><span class="help-badge help-badge-in">IN</span> JWT token &thinsp;→&thinsp; <span class="help-badge help-badge-out">OUT</span> JSON with header + payload + signature</div>
+            </div>
+
+            <div class="help-tool">
+              <div class="help-tool-name">JWT Encode</div>
+              <div class="help-tool-desc">Signs a JSON payload as a JWT using HMAC (HS256/384/512). Enter the secret and algorithm in the controls below the toolbar. Output is a signed token you can verify at jwt.io.</div>
+              <div class="help-tool-io"><span class="help-badge help-badge-in">IN</span> JSON payload + secret + algorithm &thinsp;→&thinsp; <span class="help-badge help-badge-out">OUT</span> Signed JWT</div>
             </div>
 
             <div class="help-tool">
